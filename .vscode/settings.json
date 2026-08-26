@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "*.sql": "sql",
+        "database/accommodation_form_schema.sql": "sql"
+    },
+    "mssql.languageFlavor": {
+        "database/accommodation_form_schema.sql": "sqlite"
+    },
+    "sqltools.connections": []
+}

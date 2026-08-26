@@ -323,10 +323,13 @@ if ($hotel) {
                         <div class="experience-image">
                             <?php
                                 $detailImagePath = $hotel['image'];
-                                if (strpos($detailImagePath, '../../') === 0) {
+                                // Fix image path for Hotel Module subdirectory
+                                if (strpos($detailImagePath, 'images/') === 0) {
+                                    $detailImagePath = '../' . $detailImagePath;
+                                } elseif (strpos($detailImagePath, 'assets/') === 0) {
+                                    $detailImagePath = '../' . $detailImagePath;
+                                } elseif (strpos($detailImagePath, '../../') === 0) {
                                     $detailImagePath = str_replace('../../', '../', $detailImagePath);
-                                } elseif (strpos($detailImagePath, '../assets/images/hotels/') !== 0 && strpos($detailImagePath, 'assets/images/hotels/') !== false) {
-                                    $detailImagePath = '../' . ltrim($detailImagePath, '/');
                                 }
                             ?>
                             <img src="<?php echo htmlspecialchars($detailImagePath); ?>" alt="<?php echo htmlspecialchars($hotel['name']); ?>" loading="lazy">
@@ -442,12 +445,13 @@ if ($hotel) {
                                 <?php foreach ($galleryImages as $idx => $g): ?>
                                     <?php
                                         $imgPath = $g['image'];
-                                        if (strpos($imgPath, '../../') === 0) {
+                                        // Fix image path for Hotel Module subdirectory
+                                        if (strpos($imgPath, 'images/') === 0) {
+                                            $imgPath = '../' . $imgPath;
+                                        } elseif (strpos($imgPath, 'assets/') === 0) {
+                                            $imgPath = '../' . $imgPath;
+                                        } elseif (strpos($imgPath, '../../') === 0) {
                                             $imgPath = str_replace('../../', '../', $imgPath);
-                                        }
-                                        // Normalize common stored paths
-                                        if (strpos($imgPath, 'assets/images/hotels/') === 0) {
-                                            $imgPath = '../' . ltrim($imgPath, '/');
                                         }
                                     ?>
                                     <div class="hotel-photo-thumb"

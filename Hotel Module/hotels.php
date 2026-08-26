@@ -88,8 +88,12 @@ $_SESSION['last_hotel_tab'] = $tab;
                     <?php if (!empty($hotel['image'])): ?>
                         <?php 
                             $hotelImagePath = $hotel['image'];
-                            // Fix image path if it has ../../ prefix
-                            if (strpos($hotelImagePath, '../../') === 0) {
+                            // Fix image path for Hotel Module subdirectory
+                            if (strpos($hotelImagePath, 'images/') === 0) {
+                                $hotelImagePath = '../' . $hotelImagePath;
+                            } elseif (strpos($hotelImagePath, 'assets/') === 0) {
+                                $hotelImagePath = '../' . $hotelImagePath;
+                            } elseif (strpos($hotelImagePath, '../../') === 0) {
                                 $hotelImagePath = str_replace('../../', '../', $hotelImagePath);
                             }
                         ?>

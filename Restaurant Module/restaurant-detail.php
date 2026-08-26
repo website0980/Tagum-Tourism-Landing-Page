@@ -309,7 +309,18 @@ if ($restaurant) {
 
                     <?php if (!empty($restaurant['image'])): ?>
                         <div class="experience-image">
-                            <img src="<?php echo htmlspecialchars($restaurant['image']); ?>" alt="<?php echo htmlspecialchars($restaurant['name']); ?>" loading="lazy">
+                            <?php
+                                $detailImagePath = $restaurant['image'];
+                                // Fix image path for Restaurant Module subdirectory
+                                if (strpos($detailImagePath, 'images/') === 0) {
+                                    $detailImagePath = '../' . $detailImagePath;
+                                } elseif (strpos($detailImagePath, 'assets/') === 0) {
+                                    $detailImagePath = '../' . $detailImagePath;
+                                } elseif (strpos($detailImagePath, '../../') === 0) {
+                                    $detailImagePath = str_replace('../../', '../', $detailImagePath);
+                                }
+                            ?>
+                            <img src="<?php echo htmlspecialchars($detailImagePath); ?>" alt="<?php echo htmlspecialchars($restaurant['name']); ?>" loading="lazy">
                         </div>
                     <?php endif; ?>
 
@@ -427,12 +438,13 @@ if ($restaurant) {
                                 <?php foreach ($galleryImages as $idx => $g): ?>
                                     <?php
                                         $imgPath = $g['image'];
-                                        if (strpos($imgPath, '../../') === 0) {
+                                        // Fix image path for Restaurant Module subdirectory
+                                        if (strpos($imgPath, 'images/') === 0) {
+                                            $imgPath = '../' . $imgPath;
+                                        } elseif (strpos($imgPath, 'assets/') === 0) {
+                                            $imgPath = '../' . $imgPath;
+                                        } elseif (strpos($imgPath, '../../') === 0) {
                                             $imgPath = str_replace('../../', '../', $imgPath);
-                                        }
-                                        // Normalize common stored paths
-                                        if (strpos($imgPath, 'assets/images/restaurants/') === 0) {
-                                            $imgPath = '../' . ltrim($imgPath, '/');
                                         }
                                     ?>
                                     <div class="restaurant-photo-thumb"

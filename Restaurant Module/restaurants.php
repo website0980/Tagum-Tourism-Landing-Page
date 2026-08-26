@@ -64,8 +64,12 @@ require_once '../admin/config.php';
                 <?php if (!empty($restaurant['image'])): ?>
                     <?php 
                         $restaurantImagePath = $restaurant['image'];
-                        // Fix image path if it has ../../ prefix
-                        if (strpos($restaurantImagePath, '../../') === 0) {
+                        // Fix image path for Restaurant Module subdirectory
+                        if (strpos($restaurantImagePath, 'images/') === 0) {
+                            $restaurantImagePath = '../' . $restaurantImagePath;
+                        } elseif (strpos($restaurantImagePath, 'assets/') === 0) {
+                            $restaurantImagePath = '../' . $restaurantImagePath;
+                        } elseif (strpos($restaurantImagePath, '../../') === 0) {
                             $restaurantImagePath = str_replace('../../', '../', $restaurantImagePath);
                         }
                     ?>

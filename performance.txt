@@ -1,0 +1,28 @@
+Here's a prompt you can paste into any AI tool (ChatGPT, Claude, etc.) to generate a checklist:
+
+---
+
+"Convert the following website performance recommendations into a clean markdown checklist with checkboxes [ ] for tracking progress, grouped by priority level (P0-Critical, P1-High, P2-Medium, P3-Low). For each item include:
+- A checkbox [ ]
+- A short title
+- Estimated effort (e.g., 5 min, 30 min, 1 hr)
+- File paths affected
+
+Here are the recommendations:
+
+1. Add loading="lazy" to all non-hero <img> tags across index.php, explore.php, and all module files
+2. Open SQLite database ONCE at the top of index.php instead of 4 separate times (carousel, experiences, featured destinations, plan destinations sections)
+3. Merge ~15 CSS files (style.css, mobile-navbar.css, landscape-navbar.css, explore-style.css, explore-full-page.css, explore-full-page-landscape.css, explore-sidebar-landscape.css, explore-cuisine-landscape.css, cultural-heritage.css, events-calendar.css, experience-details.css, hotels.css, restaurants.css, plan-details.css, admin.css, admin_fixed.css) into 1-2 minified files
+4. Move inline <style> blocks from index.php (hero-accordion-gallery, cultural-heritage-preview, contact-information styles) into the main CSS file
+5. Merge ~12 JS files (script.js, navbar.js, explore-full-page.js, explore-cuisine-landscape.js, explore-script.js, events-calendar.js, explore-event-landscape.js, explore-sidebar-landscape.js, experience-details.js, plan-details.js, accommodation-form.js, admin.js) into 1-2 minified files with defer attribute
+6. Move inline JS from index.php (accordion gallery auto-cycling script) into the merged JS file
+7. Convert all .jpg/.png images in images/, destinations/, experiences/, hotels/ folders to WebP format and update file paths in PHP
+8. Combine the 4 SQLite queries in index.php into fewer queries using JOINs or batch fetching
+9. Add Gzip/Brotli compression via PHP ob_start('ob_gzhandler') or .htaccess
+10. Add browser cache-control headers for static assets (images, CSS, JS) with far-future expires
+11. Remove unused CSS rules that exist across multiple files
+12. Fix HTML structure: move CSS link tags that appear after </head> in index.php into <head>
+13. Add preconnect/preload hints for any externally hosted resources
+14. Use srcset and <picture> elements for responsive images at different viewport sizes
+15. Implement a simple caching layer for database queries (e.g., cache SQLite results for 5 minutes using file-based or session cache)
+
