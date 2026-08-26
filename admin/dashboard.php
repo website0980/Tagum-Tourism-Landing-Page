@@ -32,6 +32,29 @@ function normalizeHotelCategory($category) {
     return $value;
 }
 
+// Resolve an image path stored in the DB to a URL that works from the /admin/ directory.
+// Handles full URLs, absolute paths, already-prefixed relative paths, and bare relative paths.
+function adminImagePath($path) {
+    $path = trim((string)$path);
+    if ($path === '') {
+        return '';
+    }
+    // Full URL (http:// or https://) - leave as-is
+    if (stripos($path, 'http') === 0) {
+        return $path;
+    }
+    // Absolute path from site root (e.g. /images/...) - leave as-is
+    if (strpos($path, '/') === 0) {
+        return $path;
+    }
+    // Already prefixed to escape the /admin/ directory - leave as-is
+    if (strpos($path, '../') === 0) {
+        return $path;
+    }
+    // Bare relative path (e.g. images/destinations/...) - prepend ../ to escape /admin/
+    return '../' . $path;
+}
+
 // Handle POST requests - Toggle Featured ONLY (no delete)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $action = $_POST['action'];
@@ -193,7 +216,7 @@ if (isset($_GET['message']) && $currentTab === 'carousel') {
                                     <tr>
                                         <td class="table-image">
                                             <?php if (!empty($destination['image'])): ?>
-                                                <img src="<?php echo htmlspecialchars($destination['image']); ?>" alt="<?php echo htmlspecialchars($destination['name']); ?>" loading="lazy">
+                                                <img src="<?php echo htmlspecialchars(adminImagePath($destination['image'])); ?>" alt="<?php echo htmlspecialchars($destination['name']); ?>" loading="lazy">
                                             <?php else: ?>
                                                 <span class="no-image">No Image</span>
                                             <?php endif; ?>
@@ -253,7 +276,7 @@ if (isset($_GET['message']) && $currentTab === 'carousel') {
                                     <tr>
                                         <td class="table-image">
                                             <?php if (!empty($experience['image'])): ?>
-                                                <img src="<?php echo htmlspecialchars($experience['image']); ?>" alt="<?php echo htmlspecialchars($experience['name']); ?>" loading="lazy">
+                                                <img src="<?php echo htmlspecialchars(adminImagePath($experience['image'])); ?>" alt="<?php echo htmlspecialchars($experience['name']); ?>" loading="lazy">
                                             <?php else: ?>
                                                 <span class="no-image">No Image</span>
                                             <?php endif; ?>
@@ -369,7 +392,7 @@ if (isset($_GET['message']) && $currentTab === 'carousel') {
                                     <tr>
                 <td class="table-image">
                                             <?php if (!empty($site['image'])): ?>
-<img src="<?php echo htmlspecialchars($site['image']); ?>" alt="<?php echo htmlspecialchars($site['name']); ?>" loading="lazy">
+<img src="<?php echo htmlspecialchars(adminImagePath($site['image'])); ?>" alt="<?php echo htmlspecialchars($site['name']); ?>" loading="lazy">
                                             <?php else: ?>
                                                 <span class="no-image">No Image</span>
                                             <?php endif; ?>
@@ -429,7 +452,7 @@ if (isset($_GET['message']) && $currentTab === 'carousel') {
                                     <tr>
                                         <td class="table-image">
                                             <?php if (!empty($festival['image'])): ?>
-                                                <img src="<?php echo htmlspecialchars($festival['image']); ?>" alt="<?php echo htmlspecialchars($festival['name']); ?>" loading="lazy">
+                                                <img src="<?php echo htmlspecialchars(adminImagePath($festival['image'])); ?>" alt="<?php echo htmlspecialchars($festival['name']); ?>" loading="lazy">
                                             <?php else: ?>
                                                 <span class="no-image">No Image</span>
                                             <?php endif; ?>
@@ -531,7 +554,7 @@ if (isset($_GET['message']) && $currentTab === 'carousel') {
                                     <tr>
                                         <td class="table-image">
                                             <?php if (!empty($hotel['image'])): ?>
-                                                <img src="<?php echo htmlspecialchars($hotel['image']); ?>" alt="<?php echo htmlspecialchars($hotel['name']); ?>" loading="lazy">
+                                                <img src="<?php echo htmlspecialchars(adminImagePath($hotel['image'])); ?>" alt="<?php echo htmlspecialchars($hotel['name']); ?>" loading="lazy">
                                             <?php else: ?>
                                                 <span class="no-image">No Image</span>
                                             <?php endif; ?>
@@ -587,7 +610,7 @@ if (isset($_GET['message']) && $currentTab === 'carousel') {
                                     <tr>
                                         <td class="table-image">
                                             <?php if (!empty($restaurant['image'])): ?>
-                                                <img src="<?php echo htmlspecialchars($restaurant['image']); ?>" alt="<?php echo htmlspecialchars($restaurant['name']); ?>" loading="lazy">
+                                                <img src="<?php echo htmlspecialchars(adminImagePath($restaurant['image'])); ?>" alt="<?php echo htmlspecialchars($restaurant['name']); ?>" loading="lazy">
                                             <?php else: ?>
                                                 <span class="no-image">No Image</span>
                                             <?php endif; ?>
