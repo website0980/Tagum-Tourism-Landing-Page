@@ -1,0 +1,717 @@
+/* Accommodation Certification Form */
+:root {
+    --cert-green: var(--dark-green);
+    --cert-green-light: var(--light-green);
+    --cert-border: #d1d5db;
+    --cert-bg: #f8faf9;
+}
+
+.cert-form-page {
+    background: var(--cert-bg);
+}
+
+.cert-page-header {
+    max-width: 900px;
+    margin: 0 auto 1.5rem;
+    padding: 1.25rem 1rem;
+    background: #fff;
+    border: 1px solid var(--cert-border);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+.cert-page-header-inner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.cert-page-logo {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+}
+
+.cert-page-header-text {
+    text-align: center;
+}
+
+.cert-page-line {
+    margin: 0;
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #374151;
+}
+
+.cert-page-title {
+    margin-top: 0.35rem;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--cert-green);
+}
+
+.cert-page-office {
+    margin: 0.35rem 0 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--cert-green);
+}
+
+.cert-form-main {
+    padding: 1.5rem 1rem 3rem;
+}
+
+.cert-form-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.cert-back-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: var(--cert-green);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.cert-back-link:hover {
+    text-decoration: underline;
+}
+
+.cert-application-form {
+    background: #fff;
+    border: 1px solid var(--cert-border);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+}
+
+.cert-form-header {
+    text-align: center;
+    padding: 2rem 1.5rem 1.5rem;
+    border-bottom: 2px solid var(--cert-green);
+    background: linear-gradient(180deg, #fff 0%, #f9fcfa 100%);
+}
+
+.cert-form-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.cert-form-logo {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+}
+
+.cert-form-header-text p {
+    margin: 0.15rem 0;
+    font-size: 0.95rem;
+    color: #374151;
+}
+
+.cert-republic {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.cert-office-banner {
+    display: inline-block;
+    background: var(--cert-green);
+    color: #fff;
+    padding: 0.5rem 1.5rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin: 0.75rem 0 1rem;
+    border-radius: 4px;
+}
+
+.cert-form-title {
+    font-size: 1.5rem;
+    color: #111;
+    margin: 0.5rem 0 0.25rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.cert-form-subtitle {
+    font-size: 1.1rem;
+    color: var(--cert-green);
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+}
+
+.cert-form-note {
+    font-size: 0.88rem;
+    color: #6b7280;
+    font-style: italic;
+    max-width: 640px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+.cert-form-section {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.cert-section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--cert-green);
+    margin: 0 0 0.75rem;
+}
+
+.cert-subsection-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 1.25rem 0 0.75rem;
+}
+
+.cert-input {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--cert-border);
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.cert-input:focus {
+    outline: none;
+    border-color: var(--cert-green);
+    box-shadow: 0 0 0 3px rgba(29, 90, 61, 0.12);
+}
+
+.cert-field label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.35rem;
+}
+
+.cert-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.cert-form-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.cert-form-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.cert-form-row-split {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: flex-end;
+}
+
+.cert-form-row-split .cert-field {
+    flex: 1;
+    min-width: 200px;
+}
+
+.cert-radio-group {
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.cert-radio-group legend {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.cert-check-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-right: 1.25rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.cert-category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+.cert-category-option {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--cert-border);
+    border-radius: 8px;
+    margin: 0;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.cert-category-option:has(input:checked) {
+    border-color: var(--cert-green);
+    background: rgba(29, 90, 61, 0.08);
+}
+
+.cert-employee-split {
+    margin-top: 1rem;
+}
+
+.cert-table-wrap {
+    overflow-x: auto;
+}
+
+.cert-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0.75rem;
+}
+
+.cert-data-table th,
+.cert-data-table td {
+    border: 1px solid var(--cert-border);
+    padding: 0.6rem;
+    text-align: left;
+    vertical-align: top;
+}
+
+.cert-data-table th {
+    background: #f3f4f6;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.cert-table-input {
+    width: 100%;
+    min-height: 44px;
+    margin: 0;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--cert-border);
+    border-radius: 6px;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.cert-table-input:focus {
+    background: #fff;
+    border-color: var(--cert-green);
+    box-shadow: 0 0 0 3px rgba(29, 90, 61, 0.12);
+}
+
+.cert-btn-secondary {
+    background: #f3f4f6;
+    border: 1px solid var(--cert-border);
+    color: #374151;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.cert-btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.cert-requirements {
+    background: #fafbfc;
+}
+
+.cert-requirements-list {
+    margin: 0.75rem 0;
+    padding-left: 1.25rem;
+    line-height: 1.7;
+    color: #4b5563;
+}
+
+.cert-requirements-list ul {
+    margin: 0.35rem 0 0.5rem;
+    padding-left: 1.25rem;
+}
+
+.cert-renewal-note {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.cert-renewal-fields {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--cert-border);
+    display: none;
+}
+
+.cert-renewal-fields.is-visible {
+    display: block;
+}
+
+.cert-certification {
+    background: #fff;
+}
+
+.cert-certify-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #374151;
+    margin-bottom: 1rem;
+}
+
+.cert-signature-input {
+    max-width: 400px;
+    border-bottom: 2px solid #111;
+    border-radius: 0;
+    font-family: "Segoe Script", "Brush Script MT", cursive, sans-serif;
+    font-size: 1.2rem;
+}
+
+.cert-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+}
+
+.cert-submit-btn {
+    min-width: 180px;
+}
+
+.cert-cancel-btn {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    background: #e5e7eb;
+    color: #374151;
+    font-weight: 600;
+}
+
+.cert-alert {
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.cert-alert-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
+.cert-alert ul {
+    margin: 0.5rem 0 0;
+    padding-left: 1.25rem;
+}
+
+/* Success page */
+.cert-success-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--cert-border);
+}
+
+.cert-success-icon {
+    width: 72px;
+    height: 72px;
+    background: var(--cert-green);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin: 0 auto 1.5rem;
+}
+
+.cert-success-card h1 {
+    color: var(--cert-green);
+    margin-bottom: 1rem;
+}
+
+.cert-reference {
+    font-size: 1.1rem;
+    margin: 1rem 0;
+}
+
+.cert-success-note {
+    color: #6b7280;
+    max-width: 520px;
+    margin: 0 auto 1.5rem;
+    line-height: 1.6;
+}
+
+.cert-success-actions {
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+@media (max-width: 768px) {
+    .cert-form-main {
+        padding: 1rem 0 2rem;
+    }
+
+    .cert-form-container {
+        max-width: 100%;
+        padding: 0 1rem;
+    }
+
+    .cert-form-header {
+        padding: 1.5rem 1rem 1rem;
+    }
+
+    .cert-form-title {
+        font-size: 1.35rem;
+    }
+
+    .cert-form-subtitle {
+        font-size: 1rem;
+    }
+
+    .cert-form-note {
+        font-size: 0.86rem;
+        max-width: 100%;
+    }
+
+    .cert-form-section {
+        padding: 1rem;
+    }
+
+    .cert-form-grid,
+    .cert-form-grid-2,
+    .cert-form-grid-3,
+    .cert-category-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cert-form-row-split {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .cert-form-row-split .cert-field {
+        min-width: auto;
+    }
+
+    .cert-category-option {
+        width: 100%;
+    }
+
+    .cert-table-wrap {
+        overflow-x: auto;
+    }
+
+    .cert-data-table th,
+    .cert-data-table td {
+        font-size: 0.95rem;
+    }
+
+    .cert-form-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+
+    .cert-submit-btn,
+    .cert-download-btn,
+    .cert-cancel-btn {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+/* Module link banner (hotels page) */
+.module-link-banner {
+    max-width: 1200px;
+    margin: 0 auto 1.5rem;
+    padding: 0 2rem;
+}
+
+.module-link-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    background: linear-gradient(135deg, #eef6f1 0%, #fff 100%);
+    border: 1px solid #c8e0d0;
+    border-left: 4px solid var(--cert-green);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 4px 16px rgba(29, 90, 61, 0.08);
+}
+
+.module-link-banner-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.module-link-banner-text {
+    flex: 1;
+    min-width: 200px;
+}
+
+.module-link-banner-text h3 {
+    margin: 0 0 0.35rem;
+    color: var(--cert-green);
+    font-size: 1.15rem;
+}
+
+.module-link-banner-text p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.btn-certification-apply {
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.module-link-compact {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.25rem;
+    background: var(--cert-green);
+    color: #fff !important;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.module-link-compact:hover {
+    background: var(--cert-green-light);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .cert-form-header {
+        padding: 1.5rem 1rem;
+    }
+
+    .cert-form-title {
+        font-size: 1.2rem;
+    }
+
+    .cert-form-section {
+        padding: 1rem;
+    }
+
+    .cert-form-grid,
+    .cert-form-grid-3,
+    .cert-category-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cert-form-row-split {
+        flex-direction: column;
+    }
+
+    .cert-signature-input {
+        max-width: 100%;
+    }
+
+    .cert-form-actions {
+        flex-direction: column;
+    }
+
+    .cert-submit-btn,
+    .cert-cancel-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .module-link-banner {
+        padding: 0 1rem;
+    }
+
+    .module-link-banner-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .btn-certification-apply {
+        width: 100%;
+    }
+}
+
+/* Print styles for PDF download */
+@media print {
+    .cert-back-link,
+    .cert-form-actions,
+    .cert-remove-row,
+    .cert-btn-secondary,
+    #addRoomRow,
+    #addAmenityRow {
+        display: none !important;
+    }
+
+    .cert-application-form {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+
+    .cert-form-header {
+        background: #fff !important;
+        border-bottom: 2px solid #000;
+    }
+
+    .cert-input {
+        border: 1px solid #000;
+        background: #fff;
+    }
+
+    .cert-data-table th,
+    .cert-data-table td {
+        border: 1px solid #000;
+    }
+
+    .cert-data-table th {
+        background: #f0f0f0 !important;
+    }
+
+    body {
+        background: #fff;
+    }
+
+    .cert-form-main {
+        padding: 0;
+    }
+
+    .cert-form-container {
+        max-width: 100%;
+    }
+
+    @page {
+        margin: 0.5cm;
+    }
+}

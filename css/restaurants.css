@@ -1,0 +1,23 @@
+/* Restaurants Module Styles */
+.logo-img-small { width: 32px !important; height: 32px !important; }
+body { padding-top: 0; }
+.experiences { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+.experiences h2 { font-size: 2.5rem; color: #1d5a3d; margin-bottom: 2rem; text-align: center; }
+.experiences-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+.experience-item { background-color: #f3f4f6; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; text-decoration: none; color: inherit; display: block; }
+.experience-item:hover { transform: translateY(-8px); box-shadow: 0 12px 24px rgba(29, 90, 61, 0.2); }
+.experience-item img { width: 100%; height: 220px; object-fit: cover; }
+.experience-item h3 { color: #1d5a3d; padding: 1.25rem 1.25rem 0.75rem; font-size: 1.3rem; font-weight: 600; }
+.experience-item .meta { padding: 0 1.25rem 0.5rem; font-size: 0.9rem; color: #6b7280; }
+.experience-item .distance { color: #1d5a3d; font-weight: 600; }
+.experience-item p { color: #6b7280; padding: 0 1.25rem 1rem; line-height: 1.6; }
+.restaurant-hours { padding: 0 1.25rem 0.5rem; display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.9rem; color: #6b7280; }
+.hours-label { font-weight: 600; color: #1d5a3d; flex-shrink: 0; }
+.hours-time { color: #6b7280; display: flex; flex-direction: column; gap: 0.25rem; }
+.regular-hours { display: block; }
+.time-slot { display: block; color: #1d5a3d; font-weight: 500; }
+.experience-cta { display: block; color: #1d5a3d; font-weight: 600; padding: 0 1.25rem 1.25rem; font-size: 1rem; }
+.experience-item.no-data { text-align: center; padding: 3rem 2rem; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); }
+.controls { max-width: 1200px; margin: 0 auto 2rem; padding: 0 2rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: center; }
+.btn-sort { padding: 0.75rem 1rem; background: #1d5a3d; color: white; border: none; border-radius: 25px; cursor: pointer; transition: all 0.3s; font-weight: 500; }
+.location-btn { background: #3b82f6; }

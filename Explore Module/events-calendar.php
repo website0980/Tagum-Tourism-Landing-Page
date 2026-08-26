@@ -1,0 +1,352 @@
+<?php
+require_once dirname(__DIR__) . '/includes/events_helpers.php';
+
+// Load events from database with error handling
+try {
+    $events = loadEvents(dirname(__DIR__) . '/database.db');
+} catch (Exception $e) {
+    $events = [];
+}
+
+// Load festivals from database
+$festivals = [];
+$dbFile = dirname(__DIR__) . '/database.db';
+if (file_exists($dbFile)) {
+    try {
+        $db = new SQLite3($dbFile);
+        $result = $db->query('SELECT * FROM festivals ORDER BY id');
+        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+            // Convert festival date to event_date format for consistency
+            $row['event_date'] = $row['date'] ?? '';
+            $row['type'] = 'festival';
+            $festivals[] = $row;
+        }
+        $db->close();
+    } catch (Exception $e) {
+        $festivals = [];
+    }
+}
+
+// Add type to events
+foreach ($events as &$event) {
+    $event['type'] = 'event';
+}
+unset($event);
+
+// Merge events and festivals
+$allCalendarItems = array_merge($events, $festivals);
+
+// Get featured item (first event/festival with future date or first item)
+$featuredItem = null;
+$currentDate = date('Y-m-d');
+$currentTimestamp = strtotime($currentDate);
+if (!empty($allCalendarItems)) {
+    foreach ($allCalendarItems as $item) {
+        if (!empty($item['event_date'])) {
+            $itemDate = strtotime($item['event_date']);
+            if ($itemDate !== false && $itemDate >= $currentTimestamp) {
+                $featuredItem = $item;
+                break;
+            }
+        }
+    }
+    if (!$featuredItem) {
+        $featuredItem = $allCalendarItems[0];
+    }
+}
+
+// Get upcoming items (sorted by date)
+$upcomingItems = [];
+if (!empty($allCalendarItems)) {
+    foreach ($allCalendarItems as $item) {
+        if (!empty($item['event_date'])) {
+            $itemDate = strtotime($item['event_date']);
+            $currentTimestamp = strtotime($currentDate);
+            if ($itemDate !== false && $itemDate >= $currentTimestamp) {
+                $upcomingItems[] = $item;
+            }
+        }
+    }
+    usort($upcomingItems, function($a, $b) {
+        $dateA = !empty($a['event_date']) ? strtotime($a['event_date']) : 0;
+        $dateB = !empty($b['event_date']) ? strtotime($b['event_date']) : 0;
+        return $dateA <=> $dateB;
+    });
+}
+
+// Get all items for calendar (past + upcoming)
+$allItems = $allCalendarItems ?? [];
+
+// Extract unique categories (from events only)
+$categories = [];
+foreach ($events as $event) {
+    if (!empty($event['category'])) {
+        $categories[$event['category']] = $event['category'];
+    }
+}
+$categories = array_values($categories);
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events & Festivals Calendar - Tagum City</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/events-calendar.css">
+    <link rel="stylesheet" href="../css/mobile-navbar.css">
+    <script src="../js/navbar.js"></script>
+</head>
+<body>
+<?php include '../navbar.php'; ?>
+
+    <!-- Events Calendar Section -->
+    <section class="events-calendar-section">
+        <div class="calendar-container">
+            
+            <!-- Calendar Sidebar -->
+            <aside class="calendar-sidebar">
+                <div class="calendar-widget">
+                    <div class="calendar-header">
+                        <button class="calendar-nav-btn prev-month" id="prevMonth">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
+                        <h3 class="calendar-title" id="calendarTitle">June 2026</h3>
+                        <button class="calendar-nav-btn next-month" id="nextMonth">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="calendar-grid-header">
+                        <div class="calendar-day-name">Sun</div>
+                        <div class="calendar-day-name">Mon</div>
+                        <div class="calendar-day-name">Tue</div>
+                        <div class="calendar-day-name">Wed</div>
+                        <div class="calendar-day-name">Thu</div>
+                        <div class="calendar-day-name">Fri</div>
+                        <div class="calendar-day-name">Sat</div>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Calendar days will be generated by JavaScript -->
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="events-main-content">
+                
+                <!-- Featured Event Banner -->
+                <?php if ($featuredItem): ?>
+                <div class="featured-event-banner">
+                    <?php
+                    $imagePath = $featuredItem['type'] === 'festival' 
+                        ? ($featuredItem['image'] ?? '')
+                        : fixEventImagePath($featuredItem['image'] ?? '');
+                    // Fix image path for Explore Module subdirectory
+                    if (strpos($imagePath, 'images/') === 0) {
+                        $imagePath = '../' . $imagePath;
+                    } elseif (strpos($imagePath, 'assets/') === 0) {
+                        $imagePath = '../' . $imagePath;
+                    }
+                    if (!empty($imagePath)): ?>
+                    <div class="featured-event-background">
+                        <img src="<?php echo htmlspecialchars($imagePath); ?>" alt="<?php echo htmlspecialchars($featuredItem['name']); ?>" loading="lazy" onerror="this.parentElement.style.display='none'">
+                    </div>
+                    <?php endif; ?>
+                    <div class="featured-event-content">
+                        <span class="featured-tag"><?php echo $featuredItem['type'] === 'festival' ? 'Featured Festival' : 'Featured Event'; ?></span>
+                        <h2 class="featured-event-title"><?php echo htmlspecialchars($featuredItem['name']); ?></h2>
+                        <div class="featured-event-meta">
+                            <?php if (!empty($featuredItem['event_date'])): ?>
+                            <span class="featured-event-date">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                                <?php echo htmlspecialchars(formatEventDate($featuredItem['event_date'])); ?>
+                            </span>
+                            <?php endif; ?>
+                            <?php if (!empty($featuredItem['location'])): ?>
+                            <span class="featured-event-location">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                <?php echo htmlspecialchars($featuredItem['location']); ?>
+                            </span>
+                            <?php endif; ?>
+                        </div>
+                        <a href="<?php echo $featuredItem['type'] === 'festival' ? 'festival-detail.php' : 'event1-detail.php'; ?>?id=<?php echo (int) $featuredItem['id']; ?>" class="featured-event-btn">View Details</a>
+                    </div>
+                </div>
+                <?php else: ?>
+                <div class="featured-event-banner no-event">
+                    <div class="featured-event-content">
+                        <span class="featured-tag">Welcome</span>
+                        <h2 class="featured-event-title">Discover Amazing Events & Festivals</h2>
+                        <div class="featured-event-meta">
+                            <span class="featured-event-location">Tagum City Tourism</span>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Search and Filter Section -->
+                <div class="events-filter-section">
+                    <div class="search-bar">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="eventSearch" placeholder="Search events & festivals..." class="search-input">
+                    </div>
+                    <div class="category-filters">
+                        <button class="category-filter active" data-category="all">All</button>
+                        <button class="category-filter" data-category="event">Events</button>
+                        <button class="category-filter" data-category="festival">Festivals</button>
+                        <?php foreach ($categories as $category): ?>
+                        <button class="category-filter" data-category="<?php echo htmlspecialchars(strtolower($category)); ?>">
+                            <?php echo htmlspecialchars($category); ?>
+                        </button>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <!-- Upcoming Events Section -->
+                <div class="upcoming-events-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Upcoming Events & Festivals</h2>
+                        <a href="explore.php?section=events" class="list-view-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="8" y1="12" x2="16" y2="12"></line>
+                                <polyline points="12 8 16 12 12 16"></polyline>
+                            </svg>
+                            List View
+                        </a>
+                    </div>
+                    <div class="events-grid" id="eventsGrid">
+                        <?php foreach ($upcomingItems as $item): ?>
+                        <?php 
+                        $imagePath = $item['type'] === 'festival' 
+                            ? ($item['image'] ?? '')
+                            : fixEventImagePath($item['image'] ?? '');
+                        // Fix image path for Explore Module subdirectory
+                        if (strpos($imagePath, 'images/') === 0) {
+                            $imagePath = '../' . $imagePath;
+                        } elseif (strpos($imagePath, 'assets/') === 0) {
+                            $imagePath = '../' . $imagePath;
+                        }
+                        $itemDate = !empty($item['event_date']) ? strtotime($item['event_date']) : null;
+                        $day = $itemDate ? date('j', $itemDate) : '';
+                        $month = $itemDate ? date('M', $itemDate) : '';
+                        $category = $item['type'] === 'festival' 
+                            ? 'Festival' 
+                            : (!empty($item['category']) ? htmlspecialchars($item['category']) : 'General');
+                        ?>
+                        <div class="event-card" data-date="<?php echo htmlspecialchars($item['event_date'] ?? ''); ?>" data-category="<?php echo htmlspecialchars(strtolower($item['type'])); ?>" data-type="<?php echo htmlspecialchars($item['type']); ?>">
+                            <div class="event-card-image">
+                                <?php if (!empty($imagePath)): ?>
+                                    <img src="<?php echo htmlspecialchars($imagePath); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" loading="lazy">
+                                <?php else: ?>
+                                    <div class="event-card-placeholder">
+                                        <span><?php echo $item['type'] === 'festival' ? '🎉' : '📅'; ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <div class="event-card-content-wrapper">
+                                <div class="event-date-badge">
+                                    <span class="date-day"><?php echo $day; ?></span>
+                                    <span class="date-month"><?php echo $month; ?></span>
+                                </div>
+                                <div class="event-card-content">
+                                <span class="event-category-tag"><?php echo $category; ?></span>
+                                <h3 class="event-title"><?php echo htmlspecialchars($item['name']); ?></h3>
+                                <div class="event-meta">
+                                    <?php if (!empty($item['location'])): ?>
+                                    <span class="event-location">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                            <circle cx="12" cy="10" r="3"></circle>
+                                        </svg>
+                                        <?php echo htmlspecialchars($item['location']); ?>
+                                    </span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($item['event_date'])):
+                                        $itemTime = date('g:i A', $itemDate);
+                                    ?>
+                                    <?php if ($itemTime !== '12:00 AM'): ?>
+                                    <span class="event-time">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polyline points="12 6 12 12 16 14"></polyline>
+                                        </svg>
+                                        <?php echo $itemTime; ?>
+                                    </span>
+                                    <?php endif; ?>
+                                    <?php endif; ?>
+                                </div>
+                                <p class="event-description"><?php echo htmlspecialchars(substr($item['description'] ?? '', 0, 120)); ?>...</p>
+                                <a href="<?php echo $item['type'] === 'festival' ? 'festival-detail.php' : 'event1-detail.php'; ?>?id=<?php echo (int) $item['id']; ?>" class="event-view-btn">View Details</a>
+                            </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                        
+                        <?php if (empty($upcomingItems)): ?>
+                        <div class="no-events-message">
+                            <h3>No Upcoming Events & Festivals</h3>
+                            <p>Check back later for new events and festivals!</p>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p></p>
+        </div>
+    </footer>
+
+    <!-- Events data for JavaScript -->
+    <script>
+        const eventsData = <?php echo json_encode(array_map(function($item) {
+            $imagePath = $item['type'] === 'festival' ? ($item['image'] ?? '') : fixEventImagePath($item['image'] ?? '');
+            // Fix image path for Explore Module subdirectory
+            if (strpos($imagePath, 'images/') === 0) {
+                $imagePath = '../' . $imagePath;
+            } elseif (strpos($imagePath, 'assets/') === 0) {
+                $imagePath = '../' . $imagePath;
+            }
+            // Format date to YYYY-MM-DD for JavaScript calendar
+            $dateValue = $item['event_date'] ?? '';
+            if (!empty($dateValue)) {
+                $timestamp = strtotime($dateValue);
+                if ($timestamp !== false) {
+                    $dateValue = date('Y-m-d', $timestamp);
+                }
+            }
+            return [
+                'id' => $item['id'],
+                'name' => $item['name'],
+                'date' => $dateValue,
+                'category' => $item['type'] === 'festival' ? 'Festival' : ($item['category'] ?? 'General'),
+                'type' => $item['type'] ?? 'event',
+                'location' => $item['location'] ?? '',
+                'image' => $imagePath,
+                'description' => $item['description'] ?? ''
+            ];
+        }, $allItems)); ?>;
+    </script>
+
+    <script src="../js/events-calendar.js"></script>
+</body>
+</html>

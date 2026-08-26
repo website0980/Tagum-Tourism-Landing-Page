@@ -1,0 +1,29 @@
+[
+    {
+        "id": "0",
+        "name": "Fe Misa Ayala Seniors Park ",
+        "type": "wellness",
+        "description": "Fe Misa Ayala Seniors Park is a peaceful public park in Tagum City dedicated to senior citizens, providing spaces for relaxation, light exercise, and social activities in a green and accessible environment.",
+        "date": "2025-04-11",
+        "image": "../../assets/images/experiences/experience_1773714351_69b8bbaf9e35e.jpg",
+        "featured": true
+    },
+    {
+        "id": "1",
+        "name": "Children's Park",
+        "type": "Playground ",
+        "description": "A family-friendly park designed for children, featuring playground equipment and open spaces for safe play, fun, and social interaction.",
+        "date": "2025-07-08",
+        "image": "../../assets/images/experiences/experience_1773718644_69b8cc743abfc.jpg",
+        "featured": true
+    },
+    {
+        "id": "2",
+        "name": "Region XI Wildlife Rescue Center",
+        "type": "Explore Wildlife",
+        "description": "Discover the Wild Side of Tagum! Visit the Wildlife Rescue Center in New Balamban, Tagum City \u2014 a sanctuary made possible \ud835\ude5e\ud835\ude63 \ud835\ude65\ud835\ude56\ud835\ude67\ud835\ude69\ud835\ude63\ud835\ude5a\ud835\ude67\ud835\ude68\ud835\ude5d\ud835\ude5e\ud835\ude65 \ud835\ude6c\ud835\ude5e\ud835\ude69\ud835\ude5d \ud835\ude69\ud835\ude5d\ud835\ude5a \ud835\ude47\ud835\ude42\ud835\ude50 \ud835\ude64\ud835\ude5b \ud835\ude4f\ud835\ude56\ud835\ude5c\ud835\ude6a\ud835\ude62 \ud835\ude56\ud835\ude63\ud835\ude59 \ud835\ude3f\ud835\ude40\ud835\ude49\ud835\ude4d, where you can witness monkeys and other rescued wildlife up close in their natural habitat. \ud83c\udf3f",
+        "date": "2025-06-08",
+        "image": "../../assets/images/experiences/experience_1773732204_69b9016c0f713.jpg",
+        "featured": false
+    }
+]

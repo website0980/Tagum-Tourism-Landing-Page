@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1,
+        "name": "MusiClash",
+        "description": "MusiClash is an exciting musical showdown in Tagum City where talented bands and performers compete on stage, bringing energy, creativity, and entertainment to the audience. The event highlights the city\u2019s passion for music and supports the growth of local artists and performers.",
+        "date": "February 19, 2026",
+        "highlights": "Battle of the Bands Competition \u2013 Local bands and musicians compete live on stage, showcasing their musical talent, creativity, and stage performance.\n\nLive Musical Performances \u2013 Energetic performances from participating artists featuring different music genres such as pop, rock, acoustic, and original compositions.\n\nShowcase of Local Talent \u2013 The event highlights talented musicians from Tagum City and nearby communities.\n\nAudience Engagement \u2013 Spectators enjoy live entertainment while cheering for their favorite performers.\n\nAwarding Ceremony \u2013 Winners are recognized and awarded for their outstanding performance, musicality, and stage presence.",
+        "activities": "Opening Program \u2013 Introduction of the event, participants, judges, and mechanics of the competition.\n\nBand Performances \u2013 Competing bands perform their selected songs or original compositions on stage.\n\nJudging and Evaluation \u2013 Judges evaluate each performance based on musical quality, creativity, stage presence, and audience impact.\n\nIntermission Performances \u2013 Guest performers or special numbers entertain the audience while judges deliberate.\n\nAnnouncement of Winners \u2013 The top bands are announced and given awards, certificates, or prizes.",
+        "image": "../assets/images/festivals/festival_1773304187_69b2797bbb952.jpg",
+        "created_at": "2026-03-24 11:10:51"
+    },
+    {
+        "name": "Himig Handog",
+        "description": "Himig Handog Festival is a local singing and songwriting competition held in Tagum City that celebrates the musical talent of the community. The event provides a platform for aspiring singers, musicians, and composers to showcase their original songs and vocal abilities while promoting the city.",
+        "image": "../assets/images/festivals/festival_1773303655_69b27767bf59b.jpg",
+        "date": "February 20, 2026",
+        "highlights": "Local Singing Competition \u2013 Talented singers perform original or selected songs on stage.\r\n\r\nShowcase of Local Talent \u2013 Participants from Tagum and nearby areas demonstrate their musical abilities.\r\n\r\nCommunity Entertainment \u2013 Residents and visitors enjoy live performances and musical entertainment.\r\n\r\nPromotion of Music Culture \u2013 The event strengthens Tagum City\u2019s reputation as a music-loving community.",
+        "activities": "Opening Program \u2013 Introduction of contestants, judges, and event mechanics.\r\n\r\nLive Performances \u2013 Contestants perform their songs before judges and the audience.\r\n\r\nJudging and Evaluation \u2013 Judges assess performances based on voice quality, stage presence, and interpretation.\r\n\r\nIntermission Numbers \u2013 Guest performers or local artists entertain the audience.\r\n\r\nAwarding Ceremony \u2013 Winners are announced and given prizes or recognition."
+    },
+    {
+        "id": 3,
+        "name": "Barangay Musikahan",
+        "description": "Barangay Musikahan is a community-based music event held in different barangays of Tagum City. It brings musical performances and entertainment closer to local communities while promoting the city\u2019s identity as the City of Harmony.\n\nThe activity allows local singers, musicians, and performers from different barangays to showcase their talents and celebrate music with residents. It also strengthens community participation and appreciation for local culture and Original Pilipino Music (OPM).",
+        "date": null,
+        "highlights": "Community Music Performances \u2013 Local singers and bands perform for residents in their barangay.\n\nShowcase of Local Talent \u2013 Provides opportunities for aspiring artists to perform in front of their community.\n\nCultural and Musical Celebration \u2013 Promotes music and cultural expression in different barangays.\n\nCommunity Participation \u2013 Residents gather to enjoy music, entertainment, and social interaction.",
+        "activities": "Opening Ceremony \u2013 Introduction of performers and event program.\n\nLive Performances \u2013 Singers, bands, and musicians perform various songs and musical numbers.\n\nSpecial Guest Performances \u2013 Invited artists or local performers entertain the audience.\n\nAudience Engagement \u2013 Community members participate by cheering and supporting performers.\n\nRecognition and Closing Program \u2013 Appreciation for performers and organizers.",
+        "image": "../assets/images/festivals/festival_1773298265_69b26259a2b5c.jpeg",
+        "created_at": "2026-03-24 11:10:51"
+    }
+]

@@ -1,0 +1,861 @@
+/* Explore Full-Page Styles - Fixed Layout */
+:root {
+    --dark-green: #1d5a3d;
+    --light-green: #2d7a4d;
+    --gray: #6b7280;
+    --light-gray: #f3f4f6;
+    --white: #ffffff;
+    --dark-gray: #374151;
+}
+
+.explore-full-page {
+    padding: 2rem 1rem;
+    background-color: var(--light-gray);
+    min-height: calc(100vh - 200px);
+}
+
+.explore-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Breadcrumb Navigation */
+.breadcrumb {
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+    color: var(--gray);
+    text-align: center;
+}
+
+.breadcrumb a {
+    color: var(--dark-green);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb a:hover {
+    color: var(--light-green);
+}
+
+.breadcrumb span {
+    color: var(--gray);
+}
+
+/* Section Tabs */
+.section-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--white);
+    border: 2px solid var(--light-gray);
+    color: var(--dark-gray);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    min-width: 140px;
+    text-align: center;
+}
+
+.tab-btn:hover {
+    border-color: var(--dark-green);
+    color: var(--dark-green);
+    transform: translateY(-1px);
+}
+
+.tab-btn.active {
+    background-color: var(--dark-green);
+    border-color: var(--dark-green);
+    color: var(--white);
+    box-shadow: 0 4px 12px rgba(29, 90, 61, 0.3);
+}
+
+/* Section Content */
+.section-content {
+    display: none;
+}
+
+.section-content.active {
+    display: block;
+}
+
+.section-content h1 {
+    color: var(--dark-green);
+    font-size: 2.8rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.section-content h2 {
+    color: var(--dark-green);
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.content-text {
+    background-color: var(--white);
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.content-text h3 {
+    color: var(--dark-green);
+    font-size: 1.3rem;
+    margin: 2rem 0 1rem 0;
+}
+
+.content-text p {
+    color: var(--gray);
+    margin-bottom: 1.5rem;
+    line-height: 1.8;
+    font-size: 1.05rem;
+}
+
+.content-text ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 1.5rem;
+}
+
+.content-text li {
+    color: var(--gray);
+    padding: 1rem 0;
+    padding-left: 2rem;
+    position: relative;
+    line-height: 1.7;
+    font-size: 1rem;
+}
+
+.content-text li:before {
+    content: "▸";
+    position: absolute;
+    left: 0;
+    top: 1rem;
+    color: var(--light-green);
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+.content-text strong {
+    color: var(--dark-gray);
+    font-weight: 600;
+}
+
+.calendar-view-link {
+    margin-bottom: 1.5rem;
+}
+
+.calendar-view-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--dark-green);
+    color: var(--white);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.calendar-view-btn:hover {
+    background: var(--light-green);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Cuisine Grid Styles - For cultural sites & festivals */
+.cuisine-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem auto 0;
+    max-width: 1100px;
+}
+
+.cuisine-grid.landscape-grid {
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.8rem;
+}
+
+.cuisine-category {
+    background-color: var(--white);
+    border: 1px solid var(--light-gray);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    min-height: 360px;
+}
+
+.cuisine-category.landscape-category {
+    min-height: auto;
+}
+
+.cuisine-category:hover {
+    box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+    transform: translateY(-4px);
+}
+
+.category-image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 1.8rem;
+    background: linear-gradient(135deg, var(--light-gray), var(--gray));
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.category-image.landscape-image {
+    height: 280px;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+.cuisine-category h3 {
+    color: var(--dark-green);
+    font-size: 1.4rem;
+    margin-bottom: 0.85rem;
+}
+
+.cuisine-category > p {
+    color: var(--gray);
+    margin-bottom: 1rem;
+    line-height: 1.7;
+    font-size: 1rem;
+}
+
+.item-count {
+    font-size: 1rem;
+    color: var(--white);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--light-green);
+    border-radius: 20px;
+    display: inline-block;
+}
+
+/* Events grouped by month */
+.events-section-wrapper {
+    max-width: 1200px;
+    margin: 2rem auto 0;
+}
+
+.events-by-month {
+    margin: 0;
+    max-width: 100%;
+}
+
+.month-group {
+    background: var(--white);
+    border: 1px solid var(--light-gray);
+    border-radius: 16px;
+    margin-bottom: 1rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.month-header {
+    width: 100%;
+    text-align: left;
+    background: var(--white);
+    border: none;
+    padding: 1.4rem 1.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.month-header:hover {
+    background: #f8faf9;
+}
+
+.month-header-top {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.month-label {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--dark-green);
+}
+
+.month-count {
+    background: #e8f5ee;
+    color: var(--dark-green);
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.month-chevron {
+    margin-left: auto;
+    color: var(--dark-green);
+    transition: transform 0.25s ease;
+}
+
+.month-group.is-open .month-chevron {
+    transform: rotate(180deg);
+}
+
+.month-preview {
+    margin: 0.9rem 0 0;
+    color: var(--gray);
+    line-height: 1.65;
+    font-size: 1rem;
+}
+
+.month-events {
+    padding: 0 1.5rem 1.5rem;
+}
+
+.events-month-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.event-month-card {
+    position: relative;
+    background: var(--white);
+    border: 1px solid var(--light-gray);
+    border-radius: 18px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    min-height: 420px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.event-month-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.12);
+}
+
+.event-month-card .category-image {
+    height: 180px;
+    object-fit: cover;
+    border-radius: 14px;
+    margin-bottom: 1.25rem;
+}
+
+.event-month-card h3 {
+    font-size: 1.2rem;
+    margin: 0 0 0.85rem 0;
+    color: var(--dark-gray);
+}
+
+.event-date-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #e8f5ee;
+    color: var(--dark-green);
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.event-location {
+    color: var(--gray);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.event-month-card p {
+    color: var(--gray);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+}
+
+.read-more-btn {
+    margin-top: auto;
+    background: var(--dark-green);
+    color: #ffffff !important;
+    padding: 0.85rem 1.2rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    transition: background 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.read-more-btn:hover {
+    background: var(--light-green);
+    color: #ffffff !important;
+}
+
+.cuisine-category.event-month-card {
+    height: auto;
+    min-height: auto;
+    padding: 1.5rem;
+}
+
+/* Toggle Button */
+.toggle-items-btn {
+    background: linear-gradient(135deg, var(--dark-green), var(--light-green));
+    color: var(--white);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    width: fit-content;
+    align-self: flex-start;
+    box-shadow: 0 4px 15px rgba(29,90,61,0.3);
+}
+
+.toggle-items-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(29,90,61,0.4);
+}
+
+/* Items List */
+
+@media (max-width: 900px) {
+    .explore-full-page {
+        padding: 1.5rem 1rem;
+        min-height: auto;
+    }
+
+    .content-text {
+        padding: 1.75rem;
+    }
+
+    .section-content h1 {
+        font-size: 2.4rem;
+    }
+
+    .section-content h2 {
+        font-size: 1.6rem;
+    }
+
+    .calendar-view-btn,
+    .list-view-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .events-section-wrapper,
+    .events-by-month,
+    .cuisine-grid {
+        max-width: 100%;
+        margin: 1.5rem auto 0;
+    }
+
+    .events-month-grid,
+    .cuisine-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .event-month-card,
+    .cuisine-category {
+        padding: 1.25rem;
+        min-height: auto;
+    }
+
+    .event-month-card .category-image {
+        height: 200px;
+    }
+
+    .month-header {
+        padding: 1.15rem 1.25rem;
+    }
+
+    .month-preview {
+        font-size: 0.95rem;
+    }
+
+    .month-header-top {
+        gap: 0.5rem;
+    }
+
+    .event-month-card h3 {
+        font-size: 1.1rem;
+    }
+
+    .event-date-badge,
+    .event-location,
+    .event-month-card p {
+        font-size: 0.95rem;
+    }
+
+    .event-month-card .read-more-btn {
+        width: 100%;
+        padding: 0.85rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .section-tabs {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .tab-btn {
+        width: 100%;
+    }
+
+    .content-text {
+        padding: 1.5rem;
+    }
+
+    .calendar-view-btn,
+    .list-view-btn {
+        padding: 0.75rem 1rem;
+    }
+
+    .event-month-card .category-image {
+        height: 160px;
+    }
+
+    .month-header {
+        padding: 1rem 1rem;
+    }
+
+    .month-header-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .month-chevron {
+        margin-left: 0;
+    }
+}
+
+
+.food-item {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--light-gray);
+    align-items: center;
+}
+
+.food-item:last-child {
+    border-bottom: none;
+}
+
+.food-image {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 12px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.food-info {
+    flex: 1;
+}
+
+.food-info h4 {
+    color: var(--dark-green);
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.food-info p {
+    color: var(--gray);
+    font-size: 1rem;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Landscape Cuisine Carousel */
+.cuisine-landscape-carousel {
+    position: relative;
+    margin: 3rem auto 0;
+    max-width: 1000px;
+    overflow: hidden;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #f8fff9 0%, #f0f9f4 100%);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    gap: 0;
+    padding: 2rem 3rem;
+}
+
+.carousel-slide {
+    min-width: 100%;
+    flex-shrink: 0;
+}
+
+.landscape-item {
+    display: flex;
+    height: 350px;
+    background: var(--white);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+}
+
+.landscape-image {
+    flex: 0 0 42%;
+    height: 100%;
+    position: relative;
+}
+
+.landscape-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.landscape-image::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(29,90,61,0.4), transparent 70%);
+}
+
+.landscape-info {
+    flex: 1;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.landscape-info h3 {
+    color: var(--dark-green);
+    font-size: 2.2rem;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.landscape-info p {
+    color: var(--gray);
+    margin: 0;
+    line-height: 1.7;
+    font-size: 1.1rem;
+}
+
+.item-count {
+    font-size: 1.1rem;
+    color: var(--white);
+    font-weight: 700;
+    padding: 0.5rem 1.2rem;
+    background: linear-gradient(135deg, var(--dark-green), var(--light-green));
+    border-radius: 25px;
+    display: inline-block;
+    align-self: flex-start;
+}
+
+/* Carousel Navigation */
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    color: var(--dark-green);
+    border: 2px solid var(--light-green);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.6rem;
+    font-weight: bold;
+    z-index: 10;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.carousel-btn:hover {
+    background: var(--white);
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+}
+
+.carousel-prev {
+    left: 20px;
+}
+
+.carousel-next {
+    right: 20px;
+}
+
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    padding-bottom: 1rem;
+}
+
+.carousel-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--light-gray);
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.carousel-dot.active {
+    background: var(--dark-green);
+    transform: scale(1.3);
+    border-color: var(--light-green);
+}
+
+.items-list {
+    margin-top: 1.5rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-out;
+}
+
+.items-list.show {
+    max-height: none;
+    height: auto;
+}
+.cuisine-category {
+    height: auto;
+}
+
+.food-item {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.food-item:last-child {
+    border-bottom: none;
+}
+
+.food-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 12px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.food-info h4 {
+    color: var(--dark-green);
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.food-info p {
+    color: var(--gray);
+    font-size: 0.98rem;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .carousel-track {
+        padding: 1rem 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .cuisine-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .carousel-track {
+        gap: 1rem;
+        padding: 1rem 2rem;
+    }
+    
+    .landscape-item {
+        flex-direction: column;
+        height: auto;
+        min-height: 450px;
+    }
+    
+    .landscape-image {
+        flex: none;
+        height: 250px;
+    }
+    
+    .carousel-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.3rem;
+    }
+    
+    .carousel-prev {
+        left: 10px;
+    }
+    
+    .carousel-next {
+        right: 10px;
+    }
+    
+    .landscape-info {
+        padding: 2rem;
+    }
+    
+    .section-tabs {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .tab-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .explore-full-page {
+        padding: 1rem 0.5rem;
+    }
+    
+    .carousel-btn {
+        display: none;
+    }
+    
+    .content-text {
+        padding: 1.5rem;
+        margin: 0 1rem;
+    }
+    
+    .section-content h1 {
+        font-size: 2rem;
+    }
+}
+
