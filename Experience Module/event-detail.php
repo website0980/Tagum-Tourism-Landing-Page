@@ -243,6 +243,6 @@ if ($event) {
         </div>
     </main>
 
-    <script src="../assets/js/experience-details.js"></script>
+    <script src="../js/experience-details.js"></script>
 </body>
 </html>

@@ -184,6 +184,6 @@ function adminImageSrc($path) {
     </main>
 
     <footer class="admin-footer"></footer>
-    <script src="../assets/js/admin.js"></script>
+    <script src="../js/admin.js"></script>
 </body>
 </html>

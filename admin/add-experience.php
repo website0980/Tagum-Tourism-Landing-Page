@@ -177,6 +177,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <p></p>
     </footer>
 
-    <script src="../assets/js/admin.js"></script>
+    <script src="../js/admin.js"></script>
 </body>
 </html>

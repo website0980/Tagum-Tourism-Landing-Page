@@ -321,6 +321,5 @@ $requestedSection = isset($_GET['section']) && in_array($_GET['section'], ['even
     </footer>
 
 <script src="../js/explore-full-page.js"></script>
-    <script src="../js/explore-cuisine-landscape.js"></script>
 </body>
 </html>

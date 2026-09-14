@@ -70,8 +70,8 @@ if (empty($destinations)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($selectedDestination['name'] ?? 'Destination'); ?> - Tagum City</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="stylesheet" href="../assets/css/plan-details.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/plan-details.css">
     <link rel="stylesheet" href="../css/mobile-navbar.css">
     <script src="../js/navbar.js"></script>
 </head>
@@ -120,8 +120,15 @@ if (empty($destinations)) {
                 <?php endif; ?>
                 
                 <?php if (!empty($selectedDestination['image'])): ?>
+                    <?php
+                    // Resolve image path relative to the Plan Module/ directory
+                    $destImage = trim((string)$selectedDestination['image']);
+                    if ($destImage !== '' && stripos($destImage, 'http') !== 0 && strpos($destImage, '/') !== 0 && strpos($destImage, '../') !== 0) {
+                        $destImage = '../' . $destImage;
+                    }
+                    ?>
                     <div class="image-showcase">
-                        <img src="<?php echo htmlspecialchars($selectedDestination['image']); ?>" alt="<?php echo htmlspecialchars($selectedDestination['name']); ?>" class="destination-image">
+                        <img src="<?php echo htmlspecialchars($destImage); ?>" alt="<?php echo htmlspecialchars($selectedDestination['name']); ?>" class="destination-image">
                     </div>
                 <?php endif; ?>
                 

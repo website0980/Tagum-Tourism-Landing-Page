@@ -816,7 +816,7 @@ if (isset($_GET['message']) && $currentTab === 'carousel') {
     <footer class="admin-footer">
     </footer>
 
-    <script src="../assets/js/admin.js"></script>
+    <script src="../js/admin.js"></script>
     <script>
     function filterAdminTable() {
         const input = document.getElementById('adminSearch');

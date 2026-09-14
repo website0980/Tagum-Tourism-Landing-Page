@@ -183,8 +183,8 @@
         </div>
     </footer>
 
-    <script src="../assets/js/navbar.js"></script>
-    <script src="../assets/js/script.js"></script>
+    <script src="../js/navbar.js"></script>
+    <script src="../js/script.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
 (function() {

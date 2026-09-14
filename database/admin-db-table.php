@@ -19,7 +19,7 @@ $tables = [
 <html>
 <head>
     <title>DB Table - Admin</title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../css/admin.css">
     <style>
         .db-table { font-size: 12px; }
         .db-table img { max-width: 50px; max-height: 50px; }

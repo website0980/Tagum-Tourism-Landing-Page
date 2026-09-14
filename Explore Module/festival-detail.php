@@ -154,7 +154,7 @@
         </div>
     </footer>
 
-    <script src="../assets/js/navbar.js"></script>
-    <script src="../assets/js/script.js"></script>
+    <script src="../js/navbar.js"></script>
+    <script src="../js/script.js"></script>
 </body>
 </html>

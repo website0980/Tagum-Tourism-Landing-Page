@@ -512,7 +512,7 @@ if ($hotel) {
         </div>
     </footer>
 
-    <script src="../assets/js/experience-details.js"></script>
+    <script src="../js/experience-details.js"></script>
 
     <script>
         (function () {
