@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
 require_once __DIR__ . '/../database/setup_feedback.php';
 require_once __DIR__ . '/config.php';
 requireAuth();
@@ -7,7 +8,7 @@ ensureFeedbackTable();
  
 $feedbackId = $_GET['id'] ?? 0;
  
-$dbFile = __DIR__ . '/../database.db';
+$dbFile = appDatabasePath();
 $db = new SQLite3($dbFile);
  
 $stmt = $db->prepare('SELECT * FROM feedback WHERE id = ?');

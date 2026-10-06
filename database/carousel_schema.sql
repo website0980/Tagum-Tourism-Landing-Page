@@ -10,5 +10,6 @@ CREATE TABLE IF NOT EXISTS carousel_slides (
     btn_secondary_link TEXT DEFAULT '#explore',
     sort_order INTEGER DEFAULT 0,
     active INTEGER DEFAULT 1,
+    event_month INTEGER NOT NULL DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

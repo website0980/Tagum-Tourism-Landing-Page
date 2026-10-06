@@ -1,11 +1,12 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
 // Add/Edit Festival Page
 require_once 'config.php';
 require_once dirname(__DIR__) . '/includes/events_helpers.php';
 requireAuth();
 
 $festivals = loadFestivals();
-$events = loadEvents(dirname(__DIR__) . '/database.db');
+$events = loadEvents(appDatabasePath());
 $isEdit = false;
 $festivalIndex = $_GET['id'] ?? $_GET['edit'] ?? $_POST['id'] ?? null;
 if ($festivalIndex !== null && $festivalIndex !== '') {

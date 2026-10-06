@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
 // Add/Edit Restaurant Page - Copy of hotel pattern
 require_once 'config.php';
 requireAuth();
@@ -83,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         // Only run image upload if a new file was selected.
         if (isset($_FILES['image_file']) && ($_FILES['image_file']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
-            $result = saveRestaurantImage($_FILES['image_file']);
+            $result = saveRestaurantImage($_FILES['image_file'], $_FILES['image_thumbnail'] ?? null);
             if ($result['success']) {
                 // Delete old image only when replacing
                 if ($isEdit && !empty($restaurant['image'])) {
@@ -96,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (empty($errors)) {
-            $dbFile = '../database.db';
+            $dbFile = appDatabasePath();
             if (!file_exists($dbFile)) {
                 $errors[] = 'Database file not found: ' . $dbFile;
             } else {
@@ -263,6 +264,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="form-section">
                     <h2>Restaurant Image</h2>
                     <?php $image = $restaurant['image'] ?? ''; ?>
+                    <?php $enableListingThumbnail = true; ?>
                     <?php include 'media-picker.php'; ?>
                 </div>
                 <div class="form-actions">
@@ -282,6 +284,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script>
     // Leaflet Map with two-way location sync
     let map, marker;
+    const customPinIcon = L.divIcon({
+        className: 'custom-map-pin',
+        html: `
+            <svg width="42" height="52" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="32" cy="32" r="26" fill="none" stroke="#39d96a" stroke-width="4"/>
+                <circle cx="32" cy="32" r="12" fill="none" stroke="#39d96a" stroke-width="4"/>
+            </svg>
+        `,
+        iconSize: [42, 52],
+        iconAnchor: [21, 52],
+        popupAnchor: [0, -42]
+    });
     const defaultLat = <?php echo is_numeric($restaurant['latitude'] ?? null) ? (float)$restaurant['latitude'] : 7.443; ?>;
     const defaultLng = <?php echo is_numeric($restaurant['longitude'] ?? null) ? (float)$restaurant['longitude'] : 125.807; ?>;
     const locationInput = document.getElementById('location');
@@ -298,7 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     function ensureMarker(lat, lng) {
         if (!marker) {
-            marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+            marker = L.marker([lat, lng], { draggable: true, icon: customPinIcon }).addTo(map);
             marker.on('dragend', () => updateCoords(true));
         } else {
             marker.setLatLng([lat, lng]);

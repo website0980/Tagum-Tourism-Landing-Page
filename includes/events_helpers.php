@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/database_path.php';
 /**
  * Shared helpers for events listing and month grouping.
  */
@@ -6,7 +7,7 @@
 function ensureEventDateColumn($db = null) {
     $closeDb = false;
     if ($db === null) {
-        $dbFile = dirname(__DIR__) . '/database.db';
+        $dbFile = appDatabasePath();
         if (!file_exists($dbFile)) {
             return false;
         }
@@ -31,7 +32,7 @@ function ensureEventDateColumn($db = null) {
 }
 
 function loadEvents($dbFile = null) {
-    $dbFile = $dbFile ?: dirname(__DIR__) . '/database.db';
+    $dbFile = $dbFile ?: appDatabasePath();
     if (!file_exists($dbFile)) {
         return [];
     }

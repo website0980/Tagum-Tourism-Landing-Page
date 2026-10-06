@@ -1,3 +1,9 @@
+<?php
+require_once __DIR__ . '/includes/database_path.php';
+if (!function_exists('loadHomepageSettings')) {
+    require_once __DIR__ . '/admin/config.php';
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,87 +16,197 @@
 </head>
 <body>
 
-    <!-- Hero Accordion Gallery Section -->
     <?php
     $carouselSlides = [];
-    $dbFile = 'database.db';
+    $eventMap = [];
+    $carouselImageSets = [];
+    $homepageSettings = loadHomepageSettings();
+    $defaultMonth = (int) ($homepageSettings['default_month'] ?? 5);
+    $dbFile = appDatabasePath();
     if (file_exists($dbFile)) {
         try {
             $db = new SQLite3($dbFile);
-            $schema = @file_get_contents('database/carousel_schema.sql');
-            if ($schema) {
-                $db->exec($schema);
-            }
+            ensureCarouselTable();
             $result = $db->query('SELECT * FROM carousel_slides WHERE active = 1 ORDER BY sort_order ASC, id ASC');
             while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
                 $carouselSlides[] = $row;
             }
+
+            $eventsResult = $db->query('SELECT name, event_date FROM events WHERE TRIM(COALESCE(event_date, "")) != "" ORDER BY event_date ASC');
+            while ($eventRow = $eventsResult->fetchArray(SQLITE3_ASSOC)) {
+                $eventDate = trim((string) ($eventRow['event_date'] ?? ''));
+                $ts = strtotime($eventDate);
+                if ($ts === false) {
+                    continue;
+                }
+                $monthNum = (int) date('n', $ts);
+                $eventMap[$monthNum][] = [
+                    'name' => trim((string) ($eventRow['name'] ?? '')),
+                    'date' => $eventDate,
+                ];
+            }
             $db->close();
         } catch (Exception $e) {
             $carouselSlides = [];
+            $eventMap = [];
         }
     }
+
+    $fallbackImages = array_values(array_filter(array_map(static function ($slide) {
+        return trim((string) ($slide['image'] ?? ''));
+    }, array_filter($carouselSlides, static function ($slide) {
+        return (int) ($slide['event_month'] ?? 0) === 0;
+    }))));
+    if (!$fallbackImages) {
+        $fallbackImages = array_values(array_filter(array_map(static function ($slide) {
+            return trim((string) ($slide['image'] ?? ''));
+        }, $carouselSlides)));
+    }
+    $fallbackImages = array_slice(array_merge($fallbackImages, [
+        'images/Background for slide 1.jpg',
+        'images/Background for slide 2 .jpg',
+        'images/Background for slide 3.jpg',
+    ]), 0, 3);
+    foreach (range(1, 12) as $monthNo) {
+        $monthImages = [];
+        foreach ($carouselSlides as $slide) {
+            if ((int) ($slide['event_month'] ?? 0) === $monthNo && !empty($slide['image'])) {
+                $monthImages[] = trim((string) $slide['image']);
+            }
+        }
+        $carouselImageSets[$monthNo] = array_slice(array_merge($monthImages, $fallbackImages), 0, 3);
+    }
+    $selectedImages = $carouselImageSets[$defaultMonth] ?? $fallbackImages;
+    $featuredImage = htmlspecialchars($selectedImages[0] ?? 'images/Background for slide 1.jpg', ENT_QUOTES, 'UTF-8');
+    $secondaryImage = htmlspecialchars($selectedImages[1] ?? 'images/Background for slide 2 .jpg', ENT_QUOTES, 'UTF-8');
+    $tertiaryImage = htmlspecialchars($selectedImages[2] ?? 'images/Background for slide 3.jpg', ENT_QUOTES, 'UTF-8');
+    $defaultMonthEvent = $eventMap[$defaultMonth][0] ?? ['name' => 'Community festival celebrations', 'date' => ''];
+    $heroTheme = in_array((string) ($homepageSettings['hero_theme'] ?? 'theme-soft'), ['theme-rich', 'theme-soft', 'theme-chinese-new-year'], true) ? (string) $homepageSettings['hero_theme'] : 'theme-soft';
+    $isChineseNewYearTheme = $heroTheme === 'theme-chinese-new-year';
+    $heroTitle = trim((string) ($homepageSettings['hero_title'] ?? "FLORES\nDE MAYO"));
+    $heroScript = trim((string) ($homepageSettings['hero_script'] ?? 'Faith in Bloom.'));
+    $heroDescription = trim((string) ($homepageSettings['hero_description'] ?? 'A colorful celebration of tradition, fortune, and unity, bringing Tagumenyos together through flowers, cultural heritage, and shared community spirit.'));
+    $heroCta = trim((string) ($homepageSettings['hero_cta'] ?? 'EXPLORE FESTIVAL'));
+    $heroTitleLines = preg_split('/\r\n|\r|\n/', $heroTitle) ?: ['FLORES', 'DE MAYO'];
+    $heroMonthLabel = strtoupper(date('M', mktime(0, 0, 0, $defaultMonth, 1, 2026)));
     ?>
-    <section class="hero-accordion-gallery" id="home">
-        <div class="accordion-gallery">
-            <?php if (!empty($carouselSlides)): ?>
-                <?php foreach ($carouselSlides as $index => $slide): ?>
-                    <div class="gallery-item<?php echo $index === 0 ? ' is-active' : ''; ?>" data-index="<?php echo $index; ?>">
-                        <img src="<?php echo htmlspecialchars($slide['image']); ?>" alt="<?php echo htmlspecialchars($slide['title']); ?>">
-                        <a href="<?php echo htmlspecialchars($slide['btn_primary_link'] ?? '#plan'); ?>" class="card-overlay"></a>
-                        <div class="card-content">
-                            <?php if (!empty($slide['tagline'])): ?>
-                                <p class="slide-tagline"><?php echo htmlspecialchars($slide['tagline']); ?></p>
-                            <?php endif; ?>
-                            <h3><?php echo nl2br(htmlspecialchars($slide['title'])); ?></h3>
-                            <p><?php echo htmlspecialchars($slide['description']); ?></p>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <!-- Fallback slides when database is empty -->
-                <div class="gallery-item is-active" data-index="0">
-                    <img src="images/Background for slide 1.jpg" alt="Natural Beauty">
-                    <a href="#plan" class="card-overlay"></a>
-                    <div class="card-content">
-                        <p class="slide-tagline">Tagumeños: Beauty that Shines from Within.</p>
-                        <h3>Discover Natural Beauty</h3>
-                        <p>Tagumeños are a reflection of true natural beauty radiating warmth, kindness, and genuine smiles.</p>
-                    </div>
+    <section class="festival-hero <?php echo htmlspecialchars($heroTheme); ?>" id="home">
+        <div class="hero-shell">
+            <?php if ($isChineseNewYearTheme): ?>
+                <div class="cny-lantern" aria-hidden="true">
+                    <span class="cny-lantern-cord"></span>
+                    <span class="cny-lantern-cap"></span>
+                    <span class="cny-lantern-body"></span>
+                    <span class="cny-lantern-base"></span>
+                    <span class="cny-lantern-tassel"></span>
                 </div>
-                <div class="gallery-item" data-index="1">
-                    <img src="images/Background for slide 2 .jpg" alt="Cultural Heritage">
-                    <a href="#cultural-heritage" class="card-overlay"></a>
-                    <div class="card-content">
-                        <h3>Rich Cultural Heritage</h3>
-                        <p>Experience the vibrant traditions and cultural treasures that make Tagum City unique.</p>
-                    </div>
+                <div class="cny-lantern cny-lantern-left" aria-hidden="true">
+                    <span class="cny-lantern-cord"></span>
+                    <span class="cny-lantern-cap"></span>
+                    <span class="cny-lantern-body"></span>
+                    <span class="cny-lantern-base"></span>
+                    <span class="cny-lantern-tassel"></span>
                 </div>
-                <div class="gallery-item" data-index="2">
-                    <img src="images/Background for slide 3.jpg" alt="Adventure">
-                    <a href="#experiences" class="card-overlay"></a>
-                    <div class="card-content">
-                        <h3>Unforgettable Adventures</h3>
-                        <p>From mountain trekking to river tours, discover thrilling experiences in nature.</p>
-                    </div>
-                </div>
-                <div class="gallery-item" data-index="3">
-                    <img src="images/destinations/dest_1778551486_6a028abed84a2.jpg" alt="Destinations">
-                    <a href="#featured" class="card-overlay"></a>
-                    <div class="card-content">
-                        <h3>Featured Destinations</h3>
-                        <p>Explore our top-picked attractions and hidden gems waiting to be discovered.</p>
-                    </div>
-                </div>
-                <div class="gallery-item" data-index="4">
-                    <img src="images/events/event_1778551039_6a0288ff81b81.jpg" alt="Events">
-                    <a href="#explore" class="card-overlay"></a>
-                    <div class="card-content">
-                        <h3>Vibrant Events</h3>
-                        <p>Join local festivals and celebrations showcasing music, dance, and community spirit.</p>
-                    </div>
+                <div class="cny-art-panel" aria-hidden="true">
+                    <span class="cny-art-line"><i></i><i></i><i></i><i></i></span>
+                    <span class="cny-lantern cny-lantern-side">
+                        <span class="cny-lantern-cord"></span>
+                        <span class="cny-lantern-cap"></span>
+                        <span class="cny-lantern-body"></span>
+                        <span class="cny-lantern-base"></span>
+                        <span class="cny-lantern-tassel"></span>
+                    </span>
                 </div>
             <?php endif; ?>
+            <div class="hero-inner">
+                <div class="hero-copy">
+                    <div class="hero-badge"><?php echo htmlspecialchars($heroMonthLabel); ?></div>
+                    <h1>
+                        <?php foreach ($heroTitleLines as $lineIndex => $line): ?>
+                            <?php echo htmlspecialchars($line); ?><?php if ($lineIndex !== count($heroTitleLines) - 1) { echo '<br>'; } ?>
+                        <?php endforeach; ?>
+                    </h1>
+                    <p class="hero-script"><?php echo htmlspecialchars($heroScript); ?></p>
+                    <div class="hero-meta" aria-label="Festival values">
+                        <span><?php echo htmlspecialchars((string) ($homepageSettings['hero_meta_1'] ?? 'Tradition')); ?></span>
+                        <span class="meta-separator">•</span>
+                        <span><?php echo htmlspecialchars((string) ($homepageSettings['hero_meta_2'] ?? 'Fortune')); ?></span>
+                        <span class="meta-separator">•</span>
+                        <span><?php echo htmlspecialchars((string) ($homepageSettings['hero_meta_3'] ?? 'Unity')); ?></span>
+                    </div>
+                    <p class="hero-description"><?php echo htmlspecialchars($heroDescription); ?></p>
+                    <p class="hero-month-event"><?php echo htmlspecialchars($defaultMonthEvent['name']); ?></p>
+                    <a href="#explore" class="hero-cta"><?php echo htmlspecialchars($heroCta); ?> <span>→</span></a>
+                </div>
+
+                <div class="hero-visual" aria-label="Festival imagery">
+                    <div class="hero-main-image">
+                        <img src="<?php echo $featuredImage; ?>" alt="Flores de Mayo festival celebration" loading="eager">
+                    </div>
+                    <div class="hero-side-stack">
+                        <div class="hero-side-card hero-side-card-top">
+                            <img src="<?php echo $secondaryImage; ?>" alt="Festival participant portrait" loading="lazy">
+                        </div>
+                        <div class="hero-side-card hero-side-card-bottom">
+                            <img src="<?php echo $tertiaryImage; ?>" alt="Church and community scene" loading="lazy">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-features">
+                <div class="feature-item">
+                    <div class="feature-icon feature-icon-pink">
+                        <span aria-hidden="true"><?php echo $isChineseNewYearTheme ? '🏮' : '✿'; ?></span>
+                    </div>
+                    <div class="feature-copy">
+                        <h3>TRADITION</h3>
+                        <p><?php echo $isChineseNewYearTheme ? 'Lanterns, lion dances, and festive customs.' : 'Floral offerings and cultural practices.'; ?></p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon feature-icon-mint">
+                        <span aria-hidden="true"><?php echo $isChineseNewYearTheme ? '福' : '✦'; ?></span>
+                    </div>
+                    <div class="feature-copy">
+                        <h3>FORTUNE</h3>
+                        <p><?php echo $isChineseNewYearTheme ? 'Welcoming prosperity and good luck in the new year.' : 'Celebrating blessings, abundance, and joy.'; ?></p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon feature-icon-gold">
+                        <span aria-hidden="true"><?php echo $isChineseNewYearTheme ? '團' : '◌'; ?></span>
+                    </div>
+                    <div class="feature-copy">
+                        <h3>UNITY</h3>
+                        <p><?php echo $isChineseNewYearTheme ? 'Families reunite to celebrate the new year together.' : 'Bringing families and communities together.'; ?></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-month-strip" aria-label="Festival month navigation">
+                <button class="month-nav-btn" type="button" data-nav="prev" aria-label="Previous month">←</button>
+                <div class="month-list">
+                    <?php foreach (range(1, 12) as $monthNo): ?>
+                        <?php
+                        $monthEvent = $eventMap[$monthNo][0] ?? ['name' => 'Community festival celebrations', 'date' => ''];
+                        $monthShort = strtoupper(date('M', mktime(0, 0, 0, $monthNo, 1, 2026)));
+                        ?>
+                        <button
+                            type="button"
+                            class="month-item<?php echo $monthNo === $defaultMonth ? ' month-active' : ''; ?>"
+                            data-month="<?php echo (int) $monthNo; ?>"
+                            data-event-name="<?php echo htmlspecialchars($monthEvent['name'], ENT_QUOTES, 'UTF-8'); ?>"
+                            data-event-date="<?php echo htmlspecialchars($monthEvent['date'], ENT_QUOTES, 'UTF-8'); ?>"
+                            data-image-main="<?php echo htmlspecialchars($carouselImageSets[$monthNo][0] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                            data-image-top="<?php echo htmlspecialchars($carouselImageSets[$monthNo][1] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                            data-image-bottom="<?php echo htmlspecialchars($carouselImageSets[$monthNo][2] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                            aria-label="View <?php echo htmlspecialchars($monthShort, ENT_QUOTES, 'UTF-8'); ?> events"
+                        ><?php echo htmlspecialchars($monthShort); ?></button>
+                    <?php endforeach; ?>
+                </div>
+                <button class="month-nav-btn" type="button" data-nav="next" aria-label="Next month">→</button>
+            </div>
         </div>
     </section>
 
@@ -101,7 +217,13 @@
 
             <!-- Event Card -->
             <div class="explore-card">
-                <div class="card-image">👥</div>
+                <div class="card-image simple-icon-wrap">
+                    <svg class="simple-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <circle cx="23" cy="22" r="8" fill="none" stroke="#39d96a" stroke-width="4"/>
+                        <circle cx="41" cy="24" r="7" fill="none" stroke="#39d96a" stroke-width="4"/>
+                        <path d="M12 46c1.5-7 7.2-10.8 15-10.8S50.5 39 52 46" fill="none" stroke="#39d96a" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                </div>
                 <h3>Events</h3>
                 <p>Check every events happening in Tagum City</p>
                 <a href="Explore Module/events-calendar.php" class="card-link">Learn More →</a>
@@ -109,7 +231,12 @@
             
             <!-- Festivals Card -->
             <div class="explore-card">
-                <div class="card-image">🎉</div>
+                <div class="card-image simple-icon-wrap">
+                    <svg class="simple-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M32 9l4.6 10.8L48 25l-11.4 5.2L32 41l-4.6-10.8L16 25l11.4-5.2L32 9z" fill="none" stroke="#39d96a" stroke-width="4" stroke-linejoin="round"/>
+                        <path d="M15 42l2.5-6 6 2.5-2.5 6-6-2.5zm26 0l2.5-6 6 2.5-2.5 6-6-2.5z" fill="none" stroke="#39d96a" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                </div>
                 <h3>Festivals</h3>
                 <p>Join vibrant local festivals showcasing music, dance, and culture.</p>
                 <a href="Explore Module/explore.php?section=festivals" class="card-link">Learn More →</a>
@@ -123,7 +250,7 @@
         <div class="experiences-grid">
             <?php
             // Load experiences from database with JSON fallback
-            $dbFile = 'database.db';
+            $dbFile = appDatabasePath();
             $experiences = [];
             
             if (file_exists($dbFile)) {
@@ -165,7 +292,7 @@
                     <?php else: ?>
                         <img src="assets/images/experience-default.jpg" alt="<?php echo htmlspecialchars($exp['name']); ?>" loading="lazy">
                     <?php endif; ?>
-                    <h3><?php echo isset($exp['featured']) && $exp['featured'] === true ? '⭐ ' : ''; ?><?php echo htmlspecialchars($exp['name']); ?></h3>
+                    <h3><?php echo isset($exp['featured']) && $exp['featured'] === true ? '<span class="mini-star-wrap"><svg class="mini-star-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 9l7 15 17 2-12 11 3 17-15-8-15 8 3-17L8 26l17-2L32 9z" fill="none" stroke="#39d96a" stroke-width="4" stroke-linejoin="round"/></svg></span>' : ''; ?><?php echo htmlspecialchars($exp['name']); ?></h3>
                     <p><?php echo htmlspecialchars($exp['description']); ?></p>
                     <span class="experience-cta">View Details →</span>
                 </a>
@@ -206,7 +333,7 @@
         <p class="section-subtitle">Discover our top-picked attractions and experiences</p>
         <div class="featured-grid">
 <?php
-            $dbFile = 'database.db';
+            $dbFile = appDatabasePath();
             $featuredDestinations = [];
             if (file_exists($dbFile)) {
                 try {
@@ -231,11 +358,11 @@
             ];
             
             foreach ($featuredDestinations as $dest):
-                $icon = '📍';
                 $linkName = strtolower(str_replace(' ', '-', $dest['name']));
+                $locationIcon = '<svg class="mini-location-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 4C18.3 4 8 14.2 8 27.3c0 17.5 21.2 30.8 24 34.3 2.8-3.5 24-16.8 24-34.3C56 14.2 45.7 4 32 4zm0 15.7a12 12 0 1 1 0 24 12 12 0 0 1 0-24z" fill="#ffffff" stroke="#39d96a" stroke-width="4" stroke-linejoin="round"/><circle cx="32" cy="28.5" r="8.4" fill="#ffffff" stroke="#39d96a" stroke-width="4"/></svg>';
             ?>
                 <a href="Plan Module/destination.php?destination=<?php echo $linkName; ?>" class="featured-card">
-                    <div class="featured-icon"><?php echo $icon; ?></div>
+                    <div class="featured-icon"><?php echo $locationIcon; ?></div>
                     <h3><?php echo htmlspecialchars($dest['name']); ?></h3>
                     <p><?php echo htmlspecialchars(substr($dest['description'], 0, 100)) . (strlen($dest['description']) > 100 ? '...' : ''); ?></p>
                     <span class="featured-cta">View Details →</span>
@@ -301,7 +428,7 @@
         <p class="section-subtitle">Explore our top tourist destinations with comprehensive guides, best travel times, packing lists, and visiting guidelines.</p>
 <div class="experiences-grid">
 <?php
-            $dbFile = 'database.db';
+            $dbFile = appDatabasePath();
             $destinations = [];
             if (file_exists($dbFile)) {
                 try {
@@ -328,8 +455,8 @@
             ];
             
             foreach ($destinations as $dest):
-                $icon = '📍';
                 $linkName = strtolower(str_replace(' ', '-', $dest['name']));
+                $locationIcon = '<svg class="mini-location-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 4C18.3 4 8 14.2 8 27.3c0 17.5 21.2 30.8 24 34.3 2.8-3.5 24-16.8 24-34.3C56 14.2 45.7 4 32 4zm0 15.7a12 12 0 1 1 0 24 12 12 0 0 1 0-24z" fill="#ffffff" stroke="#39d96a" stroke-width="4" stroke-linejoin="round"/><circle cx="32" cy="28.5" r="8.4" fill="#ffffff" stroke="#39d96a" stroke-width="4"/></svg>';
             ?>
                 <a href="Plan Module/destination.php?destination=<?php echo $linkName; ?>" class="experience-item">
                     <?php if (!empty($dest['image'])): ?>
@@ -337,7 +464,7 @@
                     <?php else: ?>
                         <img src="assets/images/destination-default.jpg" alt="<?php echo htmlspecialchars($dest['name']); ?>" loading="lazy">
                     <?php endif; ?>
-                    <h3><?php echo ($dest['featured'] == 1) ? '⭐ ' : ''; ?><?php echo htmlspecialchars($dest['name']); ?></h3>
+                    <h3><?php echo ($dest['featured'] == 1) ? '<span class="mini-star-wrap"><svg class="mini-star-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 9l7 15 17 2-12 11 3 17-15-8-15 8 3-17L8 26l17-2L32 9z" fill="none" stroke="#39d96a" stroke-width="4" stroke-linejoin="round"/></svg></span>' : ''; ?><?php echo htmlspecialchars($dest['name']); ?></h3>
                     <p><?php echo htmlspecialchars(substr($dest['description'], 0, 100)) . (strlen($dest['description']) > 100 ? '...' : ''); ?></p>
                     <span class="experience-cta">View Details →</span>
                 </a>
@@ -378,7 +505,13 @@
         <div class="explore-grid">
             <!-- Hotel Categories Card -->
             <div class="explore-card">
-                <div class="card-image">🏨</div>
+                <div class="card-image simple-icon-wrap">
+                    <svg class="simple-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <rect x="10" y="22" width="44" height="24" rx="4" fill="none" stroke="#39d96a" stroke-width="4"/>
+                        <path d="M18 22V14h6v8M30 22V10h6v12M42 22V16h6v6" fill="none" stroke="#39d96a" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M10 46h44" stroke="#39d96a" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                </div>
                 <h3>Hotel Categories</h3>
                 <p>Find perfect accommodations from luxury hotels to cozy stays across various categories.</p>
                 <a href="Hotel Module/hotels.php" class="card-link">Explore Hotels →</a>
@@ -386,7 +519,12 @@
             
             <!-- Restaurant Categories Card -->
             <div class="explore-card">
-                <div class="card-image">🍴</div>
+                <div class="card-image simple-icon-wrap">
+                    <svg class="simple-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M18 18h28c0 11-6.2 18.8-14 23.5C24.2 36.8 18 29 18 18z" fill="none" stroke="#39d96a" stroke-width="4" stroke-linejoin="round"/>
+                        <path d="M26 18v18M38 18v18M20 30h24" stroke="#39d96a" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                </div>
                 <h3>Restaurant Categories</h3>
                 <p>Discover diverse dining experiences from local eateries to fine dining.</p>
                 <a href="Restaurant Module/restaurants.php" class="card-link">Explore Restaurants →</a>
@@ -405,41 +543,50 @@
     <style>
         .hero-accordion-gallery {
             width: 100%;
-            height: 100vh;
-            max-height: 700px;
+            height: 82vh;
+            min-height: 480px;
+            max-height: 760px;
             overflow: hidden;
+            background: #04150f;
+            aspect-ratio: 4 / 5;
         }
         .accordion-gallery {
             display: flex;
             width: 100%;
             height: 100%;
+            overflow: hidden;
+            align-items: stretch;
         }
         .gallery-item {
-            flex: 0.7;
             position: relative;
+            flex: 0.7;
+            min-width: 0;
+            opacity: 1;
             overflow: hidden;
-            cursor: pointer;
-            transition: flex 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: auto;
+            transition: flex 0.6s ease-out, filter 0.3s ease-out;
+            filter: brightness(0.8) saturate(0.9);
         }
         .gallery-item.is-active {
-            flex: 4.5;
+            flex: 4.6;
+            filter: brightness(1) saturate(1);
         }
         .gallery-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: block;
+            background: #04150f;
+            transition: transform 0.6s ease-out, opacity 0.25s ease-out;
+            transform: scale(1.02);
+            opacity: 0.94;
+            object-position: center center;
         }
         .gallery-item.is-active img {
-            transform: scale(1.05);
-        }
-        .card-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
+            object-fit: cover;
+            transform: scale(1);
+            opacity: 1;
+            object-position: center center;
         }
         .card-content {
             position: absolute;
@@ -451,8 +598,8 @@
             color: white;
             z-index: 2;
             opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
+            transform: translateY(22px);
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out;
         }
         .gallery-item.is-active .card-content {
             opacity: 1;
@@ -476,14 +623,9 @@
         }
         @media (max-width: 768px) {
             .hero-accordion-gallery {
-                height: 60vh;
-                max-height: 400px;
-            }
-            .gallery-item {
-                flex: 0.5;
-            }
-            .gallery-item.is-active {
-                flex: 3;
+                height: 62vh;
+                min-height: 380px;
+                max-height: 520px;
             }
             .card-content {
                 padding: 1rem;
@@ -701,31 +843,54 @@
         <div class="contact-display">
             <div class="contact-details">
                 <div class="contact-row">
-                    <span class="contact-icon">🌐</span>
+                    <span class="contact-icon simple-icon-wrap">
+                        <svg class="simple-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <circle cx="32" cy="32" r="20" fill="none" stroke="#39d96a" stroke-width="4"/>
+                            <path d="M32 12v40M12 32h40" stroke="#39d96a" stroke-width="4" stroke-linecap="round"/>
+                        </svg>
+                    </span>
                     <div>
                         <strong>Website:</strong><br><a href="https://tagumcity.gov.ph" target="_blank" rel="noopener noreferrer">tagumcity.gov.ph</a>
                     </div>
                 </div>
                 <div class="contact-row">
-                    <span class="contact-icon">🌐</span>
+                    <span class="contact-icon simple-icon-wrap">
+                        <svg class="simple-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <circle cx="32" cy="32" r="20" fill="none" stroke="#39d96a" stroke-width="4"/>
+                            <path d="M32 12v40M12 32h40" stroke="#39d96a" stroke-width="4" stroke-linecap="round"/>
+                        </svg>
+                    </span>
                     <div>
                         <strong>Facebook:</strong><br><a href="https://www.facebook.com/tagumtourismandcultural" target="_blank" rel="noopener noreferrer">Tagum Tourism and Cultural Office</a>
                     </div>
                 </div>
                 <div class="contact-row">
-                    <span class="contact-icon">✉️</span>
+                    <span class="contact-icon simple-icon-wrap">
+                        <svg class="simple-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <rect x="14" y="16" width="36" height="28" rx="4" fill="none" stroke="#39d96a" stroke-width="4"/>
+                            <path d="M18 22l14 12 14-12" fill="none" stroke="#39d96a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
                     <div>
                         <strong>Email:</strong><br><a href="mailto:tagumtourismcultural@gmail.com" target="_self" rel="noopener noreferrer">tagumtourismcultural@gmail.com</a>
                     </div>
                 </div>
                 <div class="contact-row">
-                    <span class="contact-icon">📞</span>
+                    <span class="contact-icon simple-icon-wrap">
+                        <svg class="simple-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M22 16a4 4 0 0 1 4-4h5l6 12-5 3c2.7 6.2 7.3 10.8 13.5 13.5l3-5 12 6v5a4 4 0 0 1-4 4C39 60 18 39 22 16z" fill="none" stroke="#39d96a" stroke-width="4" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
                     <div>
                         <strong>Contact Number:</strong><br><a href="tel:09534971605">0953 497 1605</a>
                     </div>
                 </div>
                 <div class="contact-row">
-                    <span class="contact-icon">📍</span>
+                    <span class="contact-icon simple-icon-wrap">
+                        <svg class="simple-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M32 10c-9.7 0-17 7.4-17 16.8 0 12.7 17 26.2 17 26.2s17-13.5 17-26.2C49 17.4 41.7 10 32 10zm0 22.7A8.8 8.8 0 1 1 32 15.5a8.8 8.8 0 0 1 0 17.2z" fill="none" stroke="#39d96a" stroke-width="4" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
                     <div>
                         <strong>Address:</strong><br> 1st Floor, City of Tagum Cultural Center Bldg., Osmeña St., Tagum City, Philippines, 8100 <br>
                     </div>
@@ -815,18 +980,79 @@
 
 <script src="js/script.js"></script>
 <script>
-    // Accordion Gallery Auto-Cycling Logic
     document.addEventListener('DOMContentLoaded', function() {
-        const galleryItems = document.querySelectorAll('.gallery-item');
+        const monthButtons = Array.from(document.querySelectorAll('.month-item'));
+        const heroBadge = document.querySelector('.hero-badge');
+        const heroMonthEvent = document.querySelector('.hero-month-event');
+        const heroImages = [
+            document.querySelector('.hero-main-image img'),
+            document.querySelector('.hero-side-card-top img'),
+            document.querySelector('.hero-side-card-bottom img')
+        ];
+        const prevButton = document.querySelector('.month-nav-btn[data-nav="prev"]');
+        const nextButton = document.querySelector('.month-nav-btn[data-nav="next"]');
+        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+
+        function setSelectedMonth(monthNumber) {
+            monthButtons.forEach((button) => {
+                const isActive = Number(button.dataset.month) === monthNumber;
+                button.classList.toggle('month-active', isActive);
+                button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            });
+
+            if (heroBadge) {
+                heroBadge.textContent = monthNames[monthNumber - 1];
+            }
+
+            const selectedButton = document.querySelector('.month-item[data-month="' + monthNumber + '"]');
+            if (heroMonthEvent && selectedButton) {
+                const eventName = selectedButton.dataset.eventName || 'Community festival celebrations';
+                heroMonthEvent.textContent = eventName;
+            }
+            if (selectedButton) {
+                const monthImages = [selectedButton.dataset.imageMain, selectedButton.dataset.imageTop, selectedButton.dataset.imageBottom];
+                heroImages.forEach((image, index) => {
+                    if (image && monthImages[index]) image.src = monthImages[index];
+                });
+            }
+        }
+
+        monthButtons.forEach((button) => {
+            button.addEventListener('click', function() {
+                setSelectedMonth(Number(this.dataset.month));
+            });
+        });
+
+        if (prevButton) {
+            prevButton.addEventListener('click', function() {
+                const current = document.querySelector('.month-item.month-active');
+                const activeMonth = current ? Number(current.dataset.month) : 5;
+                const nextMonth = activeMonth <= 1 ? 12 : activeMonth - 1;
+                setSelectedMonth(nextMonth);
+            });
+        }
+
+        if (nextButton) {
+            nextButton.addEventListener('click', function() {
+                const current = document.querySelector('.month-item.month-active');
+                const activeMonth = current ? Number(current.dataset.month) : 5;
+                const nextMonth = activeMonth >= 12 ? 1 : activeMonth + 1;
+                setSelectedMonth(nextMonth);
+            });
+        }
+
+        const galleryItems = Array.from(document.querySelectorAll('.gallery-item'));
         const galleryContainer = document.querySelector('.accordion-gallery');
         let currentIndex = 0;
         let autoCycleInterval;
         let isPaused = false;
-        const cycleDuration = 5000; // 5 seconds
+        const cycleDuration = 10000;
 
         function activateCard(index) {
-            galleryItems.forEach(item => item.classList.remove('is-active'));
-            galleryItems[index].classList.add('is-active');
+            if (!galleryItems[index]) return;
+            galleryItems.forEach((item, itemIndex) => {
+                item.classList.toggle('is-active', itemIndex === index);
+            });
             currentIndex = index;
         }
 
@@ -851,37 +1077,11 @@
             }
         }
 
-        // Start auto-cycling on page load
-        startAutoCycle();
-
-        // User interaction handlers - pause on hover, resume when leaving entire gallery
-        galleryItems.forEach((item, index) => {
-            // Pause and activate on hover/focus
-            item.addEventListener('mouseenter', () => {
-                isPaused = true;
-                stopAutoCycle();
-                activateCard(index);
-            });
-
-            item.addEventListener('focusin', () => {
-                isPaused = true;
-                stopAutoCycle();
-                activateCard(index);
-            });
-        });
-
-        // Resume when mouse leaves the entire gallery
-        galleryContainer.addEventListener('mouseleave', () => {
-            isPaused = false;
+        if (galleryItems.length) {
             startAutoCycle();
-        });
-
-        // Handle focus out on container
-        galleryContainer.addEventListener('focusout', () => {
-            isPaused = false;
-            startAutoCycle();
-        });
+        }
     });
 </script>
 </body>
 </html>
+

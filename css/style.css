@@ -297,6 +297,782 @@ html {
     color: var(--dark-green);
 }
 
+/* Festival hero matching the provided mockup */
+.festival-hero {
+    --festival-shell-bg: #f8f2e7;
+    --festival-shell-border: rgba(167, 134, 82, 0.58);
+    --festival-green-deep: #1a5e42;
+    --festival-green-mid: #386c4d;
+    --festival-green-soft: #528768;
+    --festival-green-text: #103f2d;
+    --festival-gold: #efcf7c;
+    --festival-gold-deep: #c8922f;
+    --festival-gold-soft: #f0d899;
+    --festival-cream: #fffaf0;
+    --festival-muted: #3f584d;
+    position: relative;
+    max-width: 1380px;
+    margin: 2rem auto 0;
+    padding: 0 1.5rem 0;
+}
+
+.festival-hero.theme-soft {
+    --festival-green-deep: #1f6a49;
+    --festival-green-mid: #2d7a4d;
+    --festival-green-soft: #4d9a6a;
+    --festival-green-text: #1a563c;
+    --festival-gold: #d4ae5b;
+    --festival-gold-deep: #c89736;
+    --festival-gold-soft: #e4c479;
+    --festival-cream: #f9f4eb;
+    --festival-muted: #385d4d;
+}
+
+.festival-hero.theme-chinese-new-year {
+    --festival-shell-bg: #FFF4DC;
+    --festival-shell-border: rgba(217, 164, 65, 0.65);
+    --festival-green-deep: #014421;
+    --festival-green-mid: #014421;
+    --festival-green-soft: #014421;
+    --festival-green-text: #8B1E1E;
+    --festival-gold: #D9A441;
+    --festival-gold-deep: #8B1E1E;
+    --festival-gold-soft: #D9A441;
+    --festival-cream: #FFF4DC;
+    --festival-muted: #014421;
+}
+
+.theme-chinese-new-year .hero-shell {
+    background: #FFF4DC;
+    border-color: rgba(217, 164, 65, 0.65);
+}
+
+.theme-chinese-new-year .cny-lantern {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: 26%;
+    width: 76px;
+    height: 150px;
+    pointer-events: none;
+    transform: scale(0.75);
+    transform-origin: top center;
+    filter: drop-shadow(0 5px 8px rgba(139, 30, 30, 0.18));
+}
+
+.theme-chinese-new-year .cny-lantern-left {
+    top: 30px;
+    right: 36%;
+    transform: scale(0.52);
+}
+
+.theme-chinese-new-year .cny-art-panel {
+    position: absolute;
+    z-index: 1;
+    top: 0.8rem;
+    right: 1.3rem;
+    width: 190px;
+    height: 128px;
+    pointer-events: none;
+}
+
+.theme-chinese-new-year .cny-art-panel .cny-lantern-side {
+    top: 0;
+    left: 0;
+    right: auto;
+    transform: scale(0.75);
+    transform-origin: top left;
+}
+
+.theme-chinese-new-year .cny-art-line {
+    position: absolute;
+    top: 0;
+    right: 3px;
+    width: 68px;
+    height: 124px;
+    border-top: 2px solid #B88326;
+    border-right: 2px solid #B88326;
+}
+
+.theme-chinese-new-year .cny-art-line::before,
+.theme-chinese-new-year .cny-art-line::after,
+.theme-chinese-new-year .cny-art-line i {
+    position: absolute;
+    display: block;
+    border: 2px solid #B88326;
+    content: "";
+}
+
+.theme-chinese-new-year .cny-art-line::before {
+    top: 8px;
+    right: 7px;
+    width: 24px;
+    height: 24px;
+}
+
+.theme-chinese-new-year .cny-art-line::after {
+    top: 23px;
+    right: 22px;
+    width: 24px;
+    height: 24px;
+}
+
+.theme-chinese-new-year .cny-art-line i:first-child {
+    top: 48px;
+    right: 5px;
+    width: 18px;
+    height: 18px;
+}
+
+.theme-chinese-new-year .cny-art-line i:nth-child(2) {
+    top: 73px;
+    right: 20px;
+    width: 13px;
+    height: 13px;
+}
+
+.theme-chinese-new-year .cny-art-line i:nth-child(3) {
+    top: 91px;
+    right: 2px;
+    width: 16px;
+    height: 16px;
+}
+
+.theme-chinese-new-year .cny-art-line i:nth-child(4) {
+    top: 108px;
+    right: 18px;
+    width: 11px;
+    height: 11px;
+}
+
+.cny-lantern-cord,
+.cny-lantern-cap,
+.cny-lantern-body,
+.cny-lantern-base,
+.cny-lantern-tassel {
+    position: absolute;
+    display: block;
+}
+
+.cny-lantern-cord {
+    top: 0;
+    left: 37px;
+    width: 2px;
+    height: 20px;
+    background: #D9A441;
+}
+
+.cny-lantern-cap {
+    top: 18px;
+    left: 19px;
+    width: 38px;
+    height: 8px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #8B1E1E, #D9A441, #8B1E1E);
+}
+
+.cny-lantern-body {
+    top: 24px;
+    left: 8px;
+    width: 60px;
+    height: 76px;
+    overflow: hidden;
+    border: 2px solid #D9A441;
+    border-radius: 48% / 18%;
+    background: repeating-linear-gradient(90deg, transparent 0 12px, rgba(217, 164, 65, 0.88) 12px 14px), linear-gradient(100deg, #8B1E1E, #C62828 52%, #8B1E1E);
+    box-shadow: inset 0 0 10px rgba(255, 244, 220, 0.22);
+}
+
+.cny-lantern-body::before,
+.cny-lantern-body::after {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #D9A441;
+    content: "";
+}
+
+.cny-lantern-body::before {
+    top: 9px;
+}
+
+.cny-lantern-body::after {
+    bottom: 9px;
+}
+
+.cny-lantern-base {
+    top: 98px;
+    left: 17px;
+    width: 42px;
+    height: 8px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #8B1E1E, #D9A441, #8B1E1E);
+}
+
+.cny-lantern-tassel {
+    top: 106px;
+    left: 36px;
+    width: 2px;
+    height: 19px;
+    background: #C62828;
+}
+
+.cny-lantern-tassel::after {
+    position: absolute;
+    top: 14px;
+    left: -5px;
+    width: 12px;
+    height: 10px;
+    background: repeating-linear-gradient(90deg, #D9A441 0 2px, #C62828 2px 4px);
+    content: "";
+}
+
+.theme-chinese-new-year .hero-shell::before,
+.theme-chinese-new-year .hero-shell::after {
+    background: radial-gradient(circle at center, rgba(198, 40, 40, 0.12) 0%, rgba(217, 164, 65, 0.1) 40%, transparent 72%);
+}
+
+.theme-chinese-new-year .hero-badge {
+    background: linear-gradient(135deg, #8B1E1E, #C62828);
+    color: #FFF4DC;
+}
+
+.theme-chinese-new-year .hero-copy h1 {
+    background: linear-gradient(105deg, #8B1E1E 0%, #C62828 48%, #D9A441 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.theme-chinese-new-year .hero-script {
+    background: linear-gradient(105deg, #8B1E1E 0%, #C62828 48%, #D9A441 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.theme-chinese-new-year .hero-meta {
+    color: #D9A441;
+}
+
+.theme-chinese-new-year .meta-separator {
+    color: #D9A441;
+}
+
+.theme-chinese-new-year .hero-description,
+.theme-chinese-new-year .hero-month-event {
+    color: #014421;
+}
+
+.theme-chinese-new-year .hero-cta {
+    background: linear-gradient(110deg, #8B1E1E 0%, #C62828 100%);
+    border: 1px solid #D9A441;
+    color: #D9A441;
+}
+
+.theme-chinese-new-year .hero-cta:hover {
+    background: #D9A441;
+    color: #8B1E1E;
+    box-shadow: 0 12px 24px rgba(139, 30, 30, 0.2);
+}
+
+.theme-chinese-new-year .hero-cta span {
+    color: #D9A441;
+}
+
+.theme-chinese-new-year .hero-cta:hover span {
+    color: #8B1E1E;
+}
+
+.theme-chinese-new-year .hero-main-image,
+.theme-chinese-new-year .hero-side-card {
+    border-color: rgba(217, 164, 65, 0.55);
+}
+
+.theme-chinese-new-year .feature-icon-pink {
+    background: rgba(198, 40, 40, 0.14);
+    color: #8B1E1E;
+}
+
+.theme-chinese-new-year .feature-icon-mint {
+    background: rgba(1, 68, 33, 0.12);
+    color: #014421;
+}
+
+.theme-chinese-new-year .feature-icon-gold {
+    background: rgba(217, 164, 65, 0.2);
+    color: #8B1E1E;
+}
+
+.theme-chinese-new-year .feature-copy {
+    align-self: stretch;
+}
+
+.theme-chinese-new-year .feature-copy h3 {
+    color: #014421;
+}
+
+.theme-chinese-new-year .feature-copy p {
+    color: rgba(1, 68, 33, 0.82);
+}
+
+.theme-chinese-new-year .hero-features {
+    border-top-color: rgba(1, 68, 33, 0.24);
+}
+
+.hero-shell {
+    position: relative;
+    background: linear-gradient(180deg, rgba(251, 247, 239, 0.97) 0%, rgba(245, 237, 220, 0.96) 100%);
+    border: 1.5px solid var(--festival-shell-border);
+    border-radius: 42px 42px 34px 34px;
+    box-shadow: 0 0 0 0.75px rgba(167, 134, 82, 0.16), 0 10px 24px rgba(35, 51, 37, 0.06);
+    overflow: hidden;
+    padding: 2.1rem 2.1rem 0;
+    isolation: isolate;
+}
+
+.hero-shell::before,
+.hero-shell::after {
+    content: "";
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle at center, rgba(91, 146, 109, 0.18) 0%, rgba(91, 146, 109, 0.14) 35%, rgba(91, 146, 109, 0.04) 70%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.hero-shell::before {
+    top: -30px;
+    left: -65px;
+}
+
+.hero-shell::after {
+    right: -52px;
+    bottom: -52px;
+}
+
+.hero-inner {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 1.8fr;
+    align-items: center;
+    gap: 2rem;
+}
+
+.hero-copy {
+    padding: 0.5rem 0 0.5rem 0.25rem;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 150px;
+    padding: 0.75rem 1.4rem;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--festival-green-deep), var(--festival-green-mid));
+    color: var(--festival-cream);
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
+    box-shadow: inset 0 2px 12px rgba(255, 255, 255, 0.12);
+}
+
+.hero-copy h1 {
+    margin: 1.2rem 0 0.7rem;
+    font-size: clamp(4rem, 7vw, 8rem);
+    line-height: 0.82;
+    font-weight: 900;
+    letter-spacing: -0.06em;
+    color: var(--festival-green-text);
+}
+
+.hero-script {
+    margin: 0 0 1.3rem;
+    font-size: clamp(2.2rem, 3vw, 3.4rem);
+    line-height: 1;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    font-weight: 600;
+    color: var(--festival-gold-deep);
+}
+
+.hero-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--festival-green-mid);
+}
+
+.meta-separator {
+    color: rgba(17, 79, 54, 0.8);
+}
+
+.hero-description {
+    max-width: 560px;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--festival-muted);
+    margin-bottom: 2rem;
+}
+
+.hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem 1.7rem;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--festival-gold-deep), var(--festival-gold-soft));
+    color: #1a492f;
+    text-decoration: none;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    font-size: 1rem;
+    box-shadow: 0 8px 20px rgba(122, 86, 14, 0.18);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hero-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(122, 86, 14, 0.2);
+}
+
+.hero-cta span {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.hero-visual {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 1.2rem;
+    min-height: 480px;
+}
+
+.hero-main-image {
+    position: relative;
+    flex: 1.7;
+    height: 470px;
+    min-height: 470px;
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: 0 16px 28px rgba(18, 36, 26, 0.12);
+    border: 1.5px solid rgba(180, 144, 83, 0.22);
+}
+
+.hero-main-image img,
+.hero-side-card img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-side-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 250px;
+}
+
+.hero-side-card {
+    position: relative;
+    height: 220px;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 12px 22px rgba(18, 36, 26, 0.1);
+    border: 1.5px solid rgba(180, 144, 83, 0.18);
+}
+
+.hero-side-card-top {
+    height: 230px;
+}
+
+.hero-side-card-bottom {
+    height: 205px;
+}
+
+.hero-features {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    padding: 1.3rem 0 1.8rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid rgba(31, 82, 58, 0.22);
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.7rem 0.5rem;
+}
+
+.feature-icon {
+    display: grid;
+    place-items: center;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    font-size: 1.8rem;
+    font-weight: 700;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.4);
+}
+
+.feature-icon-pink {
+    background: rgba(241, 170, 201, 0.38);
+    color: #9e3f64;
+}
+
+.feature-icon-mint {
+    background: rgba(119, 188, 160, 0.28);
+    color: #1f6d4d;
+}
+
+.feature-icon-gold {
+    background: rgba(230, 201, 118, 0.3);
+    color: #8d6821;
+}
+
+.feature-copy h3 {
+    margin: 0 0 0.2rem;
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    color: #1d5a3d;
+}
+
+.feature-copy p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: rgba(28, 63, 47, 0.8);
+}
+
+.hero-month-strip {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: linear-gradient(180deg, var(--festival-green-mid) 0%, var(--festival-green-deep) 100%);
+    padding: 1.15rem 1.5rem 1.2rem;
+    border-radius: 0 0 34px 34px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 10px 18px rgba(255,255,255,0.04);
+}
+
+.month-list {
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 245, 216, 0.8);
+    font-weight: 700;
+    font-size: 0.88rem;
+    letter-spacing: 0.04em;
+}
+
+.month-list .month-item,
+.month-list span {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    opacity: 0.88;
+    background: transparent;
+    border: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    padding: 0.2rem 0.1rem;
+    transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.month-item:hover,
+.month-item:focus-visible {
+    opacity: 1;
+    color: #f7df9a;
+}
+
+.month-item.month-active,
+.month-active {
+    color: var(--festival-gold) !important;
+    opacity: 1;
+}
+
+.month-item.month-active::after,
+.month-active::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -0.9rem;
+    transform: translateX(-50%);
+    width: 38px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--festival-gold);
+    box-shadow: 0 0 12px rgba(243, 213, 122, 0.38);
+}
+
+.hero-month-event {
+    margin: 0 0 1.6rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #1d5a3d;
+}
+
+.month-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 2px solid rgba(243, 213, 122, 0.8);
+    background: rgba(255,255,255,0.05);
+    color: #f4e7b2;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+.theme-chinese-new-year .hero-month-strip {
+    margin-inline: -2.1rem;
+    background: linear-gradient(110deg, #8B1E1E 0%, #C62828 100%);
+    border-top: 1px solid rgba(217, 164, 65, 0.75);
+    box-shadow: inset 0 1px 0 rgba(255, 244, 220, 0.18);
+}
+
+.theme-chinese-new-year .month-list {
+    color: #FFF4DC;
+}
+
+.theme-chinese-new-year .month-item:hover,
+.theme-chinese-new-year .month-item:focus-visible {
+    color: #D9A441;
+}
+
+.theme-chinese-new-year .month-nav-btn {
+    border-color: #D9A441;
+    background: rgba(1, 68, 33, 0.22);
+    color: #D9A441;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.theme-chinese-new-year .month-nav-btn:hover,
+.theme-chinese-new-year .month-nav-btn:focus-visible {
+    background: #D9A441;
+    color: #8B1E1E;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 1100px) {
+    .theme-chinese-new-year .cny-lantern,
+    .theme-chinese-new-year .cny-art-panel {
+        display: none;
+    }
+
+    .hero-inner {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-copy {
+        order: 1;
+    }
+
+    .hero-visual {
+        order: 2;
+        justify-content: center;
+    }
+
+    .hero-description {
+        max-width: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .festival-hero {
+        padding: 0 0.75rem 0;
+    }
+
+    .hero-shell {
+        padding: 1.3rem 1rem 0;
+        border-radius: 28px 28px 24px 24px;
+    }
+
+    .theme-chinese-new-year .hero-month-strip {
+        margin-inline: -1rem;
+        border-radius: 0 0 24px 24px;
+    }
+
+    .hero-copy h1 {
+        font-size: clamp(3rem, 16vw, 5rem);
+    }
+
+    .hero-script {
+        font-size: clamp(1.7rem, 7vw, 2.5rem);
+    }
+
+    .hero-description {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-visual {
+        min-height: auto;
+        gap: 0.75rem;
+    }
+
+    .hero-main-image {
+        height: 260px;
+        min-height: 260px;
+    }
+
+    .hero-side-stack {
+        width: 140px;
+    }
+
+    .hero-side-card,
+    .hero-side-card-top,
+    .hero-side-card-bottom {
+        height: 150px;
+    }
+
+    .hero-features {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        padding-top: 1rem;
+    }
+
+    .feature-item {
+        padding: 0.4rem 0;
+    }
+
+    .month-list {
+        font-size: 0.66rem;
+        gap: 0.15rem;
+        flex-wrap: wrap;
+    }
+
+    .month-nav-btn {
+        width: 34px;
+        height: 34px;
+    }
+}
 
 .button-group {
     display: flex;
@@ -461,6 +1237,41 @@ html {
     margin-bottom: 1rem;
 }
 
+.simple-icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.simple-icon {
+    width: 2.2rem;
+    height: 2.2rem;
+    display: block;
+}
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+}
+
+.btn-sort .simple-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+}
+
+.contact-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-right: 0.9rem;
+    flex-shrink: 0;
+}
+
 .explore-card h3 {
     color: var(--dark-green);
     margin-bottom: 1rem;
@@ -527,7 +1338,12 @@ html {
 }
 
 .planning .experience-item {
-    padding: 1rem;
+    padding: 0;
+    background-color: var(--white);
+}
+
+.planning .experience-item img {
+    height: 250px;
 }
 
 .experience-item h3 {
@@ -539,6 +1355,17 @@ html {
 .experience-item p {
     color: var(--gray);
     padding: 0 1rem 0.5rem;
+}
+
+.planning .experience-item h3 {
+    margin: 0;
+    padding: 1.25rem 1.25rem 0.5rem;
+    font-size: 1.35rem;
+}
+
+.planning .experience-item p {
+    margin: 0;
+    padding: 0 1.25rem 1.25rem;
 }
 
 .experience-cta {
@@ -738,11 +1565,16 @@ html {
 }
 
 .featured-card::before {
-    content: "⭐";
+    content: "";
     position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 1.5rem;
+    top: 12px;
+    right: 12px;
+    width: 1.5rem;
+    height: 1.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 9l7 15 17 2-12 11 3 17-15-8-15 8 3-17L8 26l17-2L32 9z' fill='none' stroke='%2339d96a' stroke-width='4' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
 }
 
 .featured-card:hover {
@@ -752,8 +1584,46 @@ html {
 }
 
 .featured-icon {
-    font-size: 3rem;
     margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.mini-location-icon {
+    width: 2.8rem;
+    height: 2.8rem;
+    display: block;
+    flex-shrink: 0;
+    transform: translateY(1px);
+}
+
+.mini-star-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.45rem;
+    vertical-align: middle;
+}
+
+.mini-star-icon {
+    width: 1rem;
+    height: 1rem;
+    display: inline-block;
+    transform: translateY(-1px);
+}
+
+.mini-doc-icon {
+    width: 2rem;
+    height: 2rem;
+    display: block;
+}
+
+.module-link-banner-icon,
+.cert-index-promo-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .featured-card h3 {

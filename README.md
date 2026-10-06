@@ -91,3 +91,7 @@ php -S localhost:8000
 ```
 
 Then visit: `http://localhost:8000/index.php`
+
+## Database Location
+
+The SQLite database is stored outside the web root. By default, the application looks for `database.db` in a sibling `<project-folder>-data` directory. For deployment, set `TAGUM_DATABASE_PATH` to the absolute path of a private database file outside the document root before starting PHP. Keep import and setup scripts CLI-only.

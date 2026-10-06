@@ -1,8 +1,10 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
+require_once dirname(__DIR__) . '/admin/config.php';
 requireAuth(); // from config
 
 // SQLite PDO
-$pdo = new PDO('sqlite:database.db');
+$pdo = new PDO('sqlite:' . appDatabasePath());
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $tables = [

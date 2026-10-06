@@ -1,3 +1,4 @@
+<?php require_once dirname(__DIR__) . '/includes/database_path.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -84,7 +85,7 @@
             <a href="explore.php?section=events" class="back-btn">← Back to Events</a>
 
             <?php
-            $dbFile = '../database.db';
+            $dbFile = appDatabasePath();
             $eventId = $_GET['id'] ?? null;
             $event = null;
 
@@ -188,6 +189,18 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
 (function() {
+    const customPinIcon = L.divIcon({
+        className: 'custom-map-pin',
+        html: `
+            <svg width="42" height="52" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="32" cy="32" r="26" fill="none" stroke="#39d96a" stroke-width="4"/>
+                <circle cx="32" cy="32" r="12" fill="none" stroke="#39d96a" stroke-width="4"/>
+            </svg>
+        `,
+        iconSize: [42, 52],
+        iconAnchor: [21, 52],
+        popupAnchor: [0, -42]
+    });
     const eventLat = <?php echo isset($event['latitude']) && is_numeric($event['latitude']) ? $event['latitude'] : 'null'; ?>;
     const eventLng = <?php echo isset($event['longitude']) && is_numeric($event['longitude']) ? $event['longitude'] : 'null'; ?>;
     const defaultLat = 7.443;
@@ -208,12 +221,12 @@
         }).addTo(map);
         
         if (eventLat !== null && eventLng !== null) {
-            L.marker([eventLat, eventLng]).addTo(map)
+            L.marker([eventLat, eventLng], { icon: customPinIcon }).addTo(map)
                 .bindPopup('<?php echo addslashes(htmlspecialchars($event['name'] ?? 'Event')); ?>')
                 .openPopup();
             map.setView([eventLat, eventLng], 16);
         } else {
-            L.marker([defaultLat, defaultLng]).addTo(map)
+            L.marker([defaultLat, defaultLng], { icon: customPinIcon }).addTo(map)
                 .bindPopup('Tagum City<br><?php echo addslashes(htmlspecialchars($event['location'] ?? 'No location')); ?>');
         }
         

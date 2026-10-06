@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
 require_once __DIR__ . '/../database/setup_feedback.php';
 ensureFeedbackTable();
 
@@ -40,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        $dbFile = __DIR__ . '/../database.db';
+        $dbFile = appDatabasePath();
         $db = new SQLite3($dbFile);
 
         $stmt = $db->prepare('

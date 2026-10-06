@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -6,7 +7,7 @@ require_once 'config.php';
 require_once dirname(__DIR__) . '/includes/events_helpers.php';
 requireAuth();
 
-$dbFile = __DIR__ . '/../database.db';
+$dbFile = appDatabasePath();
 
 // ==================== DB CONNECT ====================
 function connectDB($dbFile) {
@@ -248,6 +249,18 @@ $stmt->execute();
     
     <script>
     let map, marker;
+    const customPinIcon = L.divIcon({
+        className: 'custom-map-pin',
+        html: `
+            <svg width="42" height="52" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="32" cy="32" r="26" fill="none" stroke="#39d96a" stroke-width="4"/>
+                <circle cx="32" cy="32" r="12" fill="none" stroke="#39d96a" stroke-width="4"/>
+            </svg>
+        `,
+        iconSize: [42, 52],
+        iconAnchor: [21, 52],
+        popupAnchor: [0, -42]
+    });
     const defaultLat = <?php echo is_numeric($site['latitude'] ?? null) ? (float)$site['latitude'] : 7.443; ?>;
     const defaultLng = <?php echo is_numeric($site['longitude'] ?? null) ? (float)$site['longitude'] : 125.807; ?>;
     const locationInput = document.getElementById('location-input');
@@ -267,7 +280,7 @@ $stmt->execute();
 
     function ensureMarker(lat, lng) {
         if (!marker) {
-            marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+            marker = L.marker([lat, lng], { draggable: true, icon: customPinIcon }).addTo(map);
             marker.on('dragend', () => updateCoordsFromMarker(true));
         } else {
             marker.setLatLng([lat, lng]);

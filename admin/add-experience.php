@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
 // CLEAN ORIGINAL - NO DEBUG - WORKS
 require_once 'config.php';
 require_once 'db_experience_helpers.php';
@@ -20,7 +21,7 @@ $id = $_GET['id'] ?? $_POST['id'] ?? null;
 if ($id !== null && $id !== '') {
     $id = (int) $id;
     // Load from DB for edit
-    $db = new SQLite3('../database.db');
+    $db = new SQLite3(appDatabasePath());
     $stmt = $db->prepare('SELECT * FROM experiences WHERE id = :id');
     $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
     $result = $stmt->execute();

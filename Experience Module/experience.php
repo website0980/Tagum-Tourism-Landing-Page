@@ -1,3 +1,4 @@
+<?php require_once dirname(__DIR__) . '/includes/database_path.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,7 +18,7 @@
         <div class="container">
             <?php
             // Load experiences from database with JSON fallback
-            $dbFile = '../database.db';
+            $dbFile = appDatabasePath();
             $experiences = [];
             
             if (file_exists($dbFile)) {

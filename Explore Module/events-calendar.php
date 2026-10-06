@@ -1,16 +1,17 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
 require_once dirname(__DIR__) . '/includes/events_helpers.php';
 
 // Load events from database with error handling
 try {
-    $events = loadEvents(dirname(__DIR__) . '/database.db');
+    $events = loadEvents(appDatabasePath());
 } catch (Exception $e) {
     $events = [];
 }
 
 // Load festivals from database
 $festivals = [];
-$dbFile = dirname(__DIR__) . '/database.db';
+$dbFile = appDatabasePath();
 if (file_exists($dbFile)) {
     try {
         $db = new SQLite3($dbFile);
@@ -36,7 +37,7 @@ unset($event);
 // Merge events and festivals
 $allCalendarItems = array_merge($events, $festivals);
 
-// Get featured item (first event/festival with future date or first item)
+// Get the first event or festival that has not yet passed.
 $featuredItem = null;
 $currentDate = date('Y-m-d');
 $currentTimestamp = strtotime($currentDate);
@@ -49,9 +50,6 @@ if (!empty($allCalendarItems)) {
                 break;
             }
         }
-    }
-    if (!$featuredItem) {
-        $featuredItem = $allCalendarItems[0];
     }
 }
 
@@ -108,13 +106,13 @@ $categories = array_values($categories);
             <aside class="calendar-sidebar">
                 <div class="calendar-widget">
                     <div class="calendar-header">
-                        <button class="calendar-nav-btn prev-month" id="prevMonth">
+                        <button class="calendar-nav-btn prev-month" id="prevMonth" aria-label="Previous month">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polyline points="15 18 9 12 15 6"></polyline>
                             </svg>
                         </button>
                         <h3 class="calendar-title" id="calendarTitle">June 2026</h3>
-                        <button class="calendar-nav-btn next-month" id="nextMonth">
+                        <button class="calendar-nav-btn next-month" id="nextMonth" aria-label="Next month">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polyline points="9 18 15 12 9 6"></polyline>
                             </svg>
@@ -137,6 +135,7 @@ $categories = array_values($categories);
 
             <!-- Main Content Area -->
             <main class="events-main-content">
+                <h1 class="events-page-title">Events &amp; Festivals Calendar</h1>
                 
                 <!-- Featured Event Banner -->
                 <?php if ($featuredItem): ?>

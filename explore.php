@@ -1,6 +1,7 @@
 <?php
+require_once __DIR__ . '/includes/database_path.php';
 // Load real data from the SQLite database
-$dbFile = __DIR__ . '/database.db';
+$dbFile = appDatabasePath();
 $events = [];
 $festivals = [];
 

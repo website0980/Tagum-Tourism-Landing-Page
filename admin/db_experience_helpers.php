@@ -1,9 +1,10 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
 // Helper functions for adding/updating experiences in database.db
 function db_connect() {
 
     // Use an absolute DB path to avoid directory issues.
-    $dbFile = dirname(__DIR__) . '/database.db';
+    $dbFile = appDatabasePath();
 
     if (!file_exists($dbFile)) {
         throw new RuntimeException('SQLite database file not found: ' . $dbFile);

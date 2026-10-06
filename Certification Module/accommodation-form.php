@@ -24,6 +24,9 @@ $hotelsBackUrl = ($track === 'dot_accredited')
     : '../Hotel Module/hotels.php?tab=local';
 
 $selectedTrack = $formData['certification_track'] ?? $track;
+$trackTitle = ($selectedTrack === 'dot_accredited')
+    ? 'DOT Accredited Certification Application Form'
+    : 'Local Certification Application Form';
 
 
 $today = date('Y-m-d');
@@ -33,7 +36,7 @@ $today = date('Y-m-d');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Local Certification Application - Tagum City</title>
+    <title><?php echo htmlspecialchars($trackTitle, ENT_QUOTES, 'UTF-8'); ?> - Tagum City</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/mobile-navbar.css">
     <link rel="stylesheet" href="../css/accommodation-form.css">

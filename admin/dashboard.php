@@ -2,6 +2,8 @@
 // Admin Dashboard - Tagum City
 require_once 'config.php';
 requireAuth();
+$dashboardAdmin = currentAdminUser();
+$pendingPasswordChangeCount = (int)$dashboardAdmin['is_super_admin'] === 1 ? countPendingAdminPasswordChangeRequests() : 0;
 
 $destinations = loadDestinations();
 $experiences = loadExperiences();
@@ -10,6 +12,7 @@ $festivals = loadFestivals();
 $hotels = loadHotels();
 $restaurants = loadRestaurants();
 $carouselSlides = loadCarouselSlides();
+$homepageSettings = loadHomepageSettings();
 $certificationApplications = loadAccommodationApplications();
 $culturalHeritage = json_decode(file_get_contents('../Cultural Heritage Module/cultural-heritage.json'), true) ?? [];
 
@@ -88,6 +91,30 @@ case 'toggle-featured':
             }
             break;
 
+        case 'update-homepage-settings':
+            $theme = in_array($_POST['hero_theme'] ?? '', ['theme-rich', 'theme-soft', 'theme-chinese-new-year'], true) ? $_POST['hero_theme'] : 'theme-soft';
+            $defaultMonth = max(1, min(12, (int)($_POST['default_month'] ?? 5)));
+            $saved = saveHomepageSettings([
+                'hero_title' => trim((string)($_POST['hero_title'] ?? "FLORES\nDE MAYO")),
+                'hero_script' => trim((string)($_POST['hero_script'] ?? 'Faith in Bloom.')),
+                'hero_description' => trim((string)($_POST['hero_description'] ?? 'A colorful celebration of tradition, fortune, and unity, bringing Tagumenyos together through flowers, cultural heritage, and shared community spirit.')),
+                'hero_cta' => trim((string)($_POST['hero_cta'] ?? 'EXPLORE FESTIVAL')),
+                'hero_theme' => $theme,
+                'default_month' => $defaultMonth,
+                'hero_meta_1' => trim((string)($_POST['hero_meta_1'] ?? 'Tradition')),
+                'hero_meta_2' => trim((string)($_POST['hero_meta_2'] ?? 'Fortune')),
+                'hero_meta_3' => trim((string)($_POST['hero_meta_3'] ?? 'Unity')),
+            ]);
+            if ($saved) {
+                $homepageSettings = loadHomepageSettings();
+                $message = 'Homepage settings updated successfully!';
+                $messageType = 'success';
+            } else {
+                $message = 'Failed to update homepage settings.';
+                $messageType = 'error';
+            }
+            break;
+
         case 'update-application-status':
             if ($id !== null && isset($_POST['status'])) {
                 updateApplicationStatus($id, $_POST['status']);
@@ -156,6 +183,15 @@ if (isset($_GET['message']) && $currentTab === 'carousel') {
             </div>
             <div class="admin-nav">
                 <span class="admin-user">Welcome, <strong><?php echo htmlspecialchars($_SESSION['admin_username']); ?></strong></span>
+                <a href="support-chat.php" class="btn btn-primary tab-btn">Support Chat</a>
+                <?php if ((int)currentAdminUser()['is_super_admin'] === 1): ?>
+                    <a href="access-management.php" class="btn btn-primary tab-btn">Accounts &amp; Roles</a>
+                    <?php if ($pendingPasswordChangeCount > 0): ?>
+                        <a href="access-management.php#password-requests" class="btn btn-primary tab-btn">Password Requests (<?php echo $pendingPasswordChangeCount; ?>)</a>
+                    <?php endif; ?>
+                <?php elseif (adminCan('user_management', 'manage')): ?>
+                    <a href="access-management.php" class="btn btn-primary tab-btn">Admin Accounts</a>
+                <?php endif; ?>
                 <a href="logout.php" class="btn btn-primary tab-btn logout-btn">Logout</a>
             </div>
         </div>
@@ -173,17 +209,17 @@ if (isset($_GET['message']) && $currentTab === 'carousel') {
 
             <!-- Tab Navigation Buttons -->
             <div class="tab-buttons">
-                <a href="?tab=destinations" class="btn btn-primary tab-btn <?php echo $currentTab === 'destinations' ? 'active' : ''; ?>">Destinations</a>
-                <a href="?tab=experiences" class="btn btn-primary tab-btn <?php echo $currentTab === 'experiences' ? 'active' : ''; ?>">Experiences</a>
-                <a href="?tab=cultural-heritage" class="btn btn-primary tab-btn <?php echo $currentTab === 'cultural-heritage' ? 'active' : ''; ?>">Cultural Heritage</a>
-                <a href="?tab=events" class="btn btn-primary tab-btn <?php echo $currentTab === 'events' ? 'active' : ''; ?>">Events</a>
-                <a href="?tab=festivals" class="btn btn-primary tab-btn <?php echo $currentTab === 'festivals' ? 'active' : ''; ?>">Festivals</a>
-                <a href="?tab=hotels" class="btn btn-primary tab-btn <?php echo $currentTab === 'hotels' ? 'active' : ''; ?>">Hotels</a>
-                <a href="?tab=restaurants" class="btn btn-primary tab-btn <?php echo $currentTab === 'restaurants' ? 'active' : ''; ?>">Restaurants</a>
-                <a href="?tab=certification" class="btn btn-primary tab-btn <?php echo $currentTab === 'certification' ? 'active' : ''; ?>">Certification</a>
-                <a href="?tab=carousel" class="btn btn-primary tab-btn <?php echo $currentTab === 'carousel' ? 'active' : ''; ?>">Carousel</a>
-                <a href="feedback-management.php" class="btn btn-primary tab-btn">Feedback Management</a>
-                <a href="feedback-reports.php" class="btn btn-primary tab-btn">Feedback Reports</a>
+                <?php if (adminCan('destinations')): ?><a href="?tab=destinations" class="btn btn-primary tab-btn <?php echo $currentTab === 'destinations' ? 'active' : ''; ?>">Destinations</a><?php endif; ?>
+                <?php if (adminCan('experiences')): ?><a href="?tab=experiences" class="btn btn-primary tab-btn <?php echo $currentTab === 'experiences' ? 'active' : ''; ?>">Experiences</a><?php endif; ?>
+                <?php if (adminCan('cultural_heritage')): ?><a href="?tab=cultural-heritage" class="btn btn-primary tab-btn <?php echo $currentTab === 'cultural-heritage' ? 'active' : ''; ?>">Cultural Heritage</a><?php endif; ?>
+                <?php if (adminCan('events')): ?><a href="?tab=events" class="btn btn-primary tab-btn <?php echo $currentTab === 'events' ? 'active' : ''; ?>">Events</a><?php endif; ?>
+                <?php if (adminCan('festivals')): ?><a href="?tab=festivals" class="btn btn-primary tab-btn <?php echo $currentTab === 'festivals' ? 'active' : ''; ?>">Festivals</a><?php endif; ?>
+                <?php if (adminCan('hotels')): ?><a href="?tab=hotels" class="btn btn-primary tab-btn <?php echo $currentTab === 'hotels' ? 'active' : ''; ?>">Hotels</a><?php endif; ?>
+                <?php if (adminCan('restaurants')): ?><a href="?tab=restaurants" class="btn btn-primary tab-btn <?php echo $currentTab === 'restaurants' ? 'active' : ''; ?>">Restaurants</a><?php endif; ?>
+                <?php if (adminCan('certification')): ?><a href="?tab=certification" class="btn btn-primary tab-btn <?php echo $currentTab === 'certification' ? 'active' : ''; ?>">Certification</a><?php endif; ?>
+                <?php if (adminCan('carousel')): ?><a href="?tab=carousel" class="btn btn-primary tab-btn <?php echo $currentTab === 'carousel' ? 'active' : ''; ?>">Carousel</a><?php endif; ?>
+                <?php if (adminCan('feedback')): ?><a href="feedback-management.php" class="btn btn-primary tab-btn">Feedback Management</a><?php endif; ?>
+                <?php if (adminCan('reports')): ?><a href="feedback-reports.php" class="btn btn-primary tab-btn">Feedback Reports</a><?php endif; ?>
                 <div class="admin-search-wrapper">
                     <input type="text" id="adminSearch" class="admin-search-input" placeholder="🔍 Search <?php echo ucfirst($currentTab); ?>..." onkeyup="filterAdminTable()">
                 </div>
@@ -748,8 +784,64 @@ if (isset($_GET['message']) && $currentTab === 'carousel') {
 
             <?php if ($currentTab === 'carousel'): ?>
                 <div class="dashboard-header">
-                    <h2>Manage Homepage Carousel</h2>
+                    <h2>Manage Homepage</h2>
                     <a href="add-carousel-slide.php" class="btn btn-primary">+ Add Carousel Slide</a>
+                </div>
+
+                <div class="homepage-settings-card">
+                    <h3>Homepage Hero Settings</h3>
+                    <form method="POST" class="homepage-settings-form">
+                        <input type="hidden" name="action" value="update-homepage-settings">
+                        <div class="homepage-settings-grid">
+                            <div class="homepage-field">
+                                <label for="hero_title">Hero title</label>
+                                <textarea id="hero_title" name="hero_title" rows="2" required><?php echo htmlspecialchars((string)($homepageSettings['hero_title'] ?? "FLORES\nDE MAYO")); ?></textarea>
+                            </div>
+                            <div class="homepage-field">
+                                <label for="hero_script">Hero script</label>
+                                <input id="hero_script" name="hero_script" type="text" value="<?php echo htmlspecialchars((string)($homepageSettings['hero_script'] ?? 'Faith in Bloom.')); ?>" required>
+                            </div>
+                            <div class="homepage-field">
+                                <label for="default_month">Default month</label>
+                                <select id="default_month" name="default_month">
+                                    <?php foreach (range(1, 12) as $month): ?>
+                                        <option value="<?php echo $month; ?>" <?php echo ((int)($homepageSettings['default_month'] ?? 5) === $month) ? 'selected' : ''; ?>><?php echo date('F', mktime(0,0,0,$month,1,2026)); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="homepage-field">
+                                <label for="hero_theme">Theme</label>
+                                <select id="hero_theme" name="hero_theme">
+                                    <option value="theme-soft" <?php echo (($homepageSettings['hero_theme'] ?? 'theme-soft') === 'theme-soft') ? 'selected' : ''; ?>>Soft green</option>
+                                    <option value="theme-rich" <?php echo (($homepageSettings['hero_theme'] ?? 'theme-soft') === 'theme-rich') ? 'selected' : ''; ?>>Rich green</option>
+                                    <option value="theme-chinese-new-year" <?php echo (($homepageSettings['hero_theme'] ?? 'theme-soft') === 'theme-chinese-new-year') ? 'selected' : ''; ?>>Chinese New Year red and gold</option>
+                                </select>
+                            </div>
+                            <div class="homepage-field">
+                                <label for="hero_meta_1">Tradition label</label>
+                                <input id="hero_meta_1" name="hero_meta_1" type="text" value="<?php echo htmlspecialchars((string)($homepageSettings['hero_meta_1'] ?? 'Tradition')); ?>" required>
+                            </div>
+                            <div class="homepage-field">
+                                <label for="hero_meta_2">Fortune label</label>
+                                <input id="hero_meta_2" name="hero_meta_2" type="text" value="<?php echo htmlspecialchars((string)($homepageSettings['hero_meta_2'] ?? 'Fortune')); ?>" required>
+                            </div>
+                            <div class="homepage-field">
+                                <label for="hero_meta_3">Unity label</label>
+                                <input id="hero_meta_3" name="hero_meta_3" type="text" value="<?php echo htmlspecialchars((string)($homepageSettings['hero_meta_3'] ?? 'Unity')); ?>" required>
+                            </div>
+                            <div class="homepage-field homepage-field-full">
+                                <label for="hero_description">Hero description</label>
+                                <textarea id="hero_description" name="hero_description" rows="3" required><?php echo htmlspecialchars((string)($homepageSettings['hero_description'] ?? 'A colorful celebration of tradition, fortune, and unity, bringing Tagumenyos together through flowers, cultural heritage, and shared community spirit.')); ?></textarea>
+                            </div>
+                            <div class="homepage-field homepage-field-full">
+                                <label for="hero_cta">CTA label</label>
+                                <input id="hero_cta" name="hero_cta" type="text" value="<?php echo htmlspecialchars((string)($homepageSettings['hero_cta'] ?? 'EXPLORE FESTIVAL')); ?>" required>
+                            </div>
+                        </div>
+                        <div class="homepage-settings-actions">
+                            <button type="submit" class="btn btn-primary homepage-save-btn">Save Homepage Settings</button>
+                        </div>
+                    </form>
                 </div>
 
                 <div class="table-responsive">
@@ -763,8 +855,8 @@ if (isset($_GET['message']) && $currentTab === 'carousel') {
                             <thead>
                                 <tr>
                                     <th>Image</th>
-                                    <th>Main Heading</th>
-                                    <th>Tagline</th>
+                                    <th>Homepage Image</th>
+                                    <th>Homepage Month</th>
                                     <th>Order</th>
                                     <th>Visible</th>
                                     <th>Actions</th>
@@ -777,7 +869,6 @@ if (isset($_GET['message']) && $currentTab === 'carousel') {
                                     if ($carouselImg && strpos($carouselImg, 'http') !== 0 && strpos($carouselImg, '../') !== 0) {
                                         $carouselImg = '../' . ltrim($carouselImg, '/');
                                     }
-                                    $titlePreview = str_replace("\n", ' ', $carouselSlide['title'] ?? '');
                                     ?>
                                     <tr>
                                         <td class="table-image">
@@ -787,8 +878,8 @@ if (isset($_GET['message']) && $currentTab === 'carousel') {
                                                 <span class="no-image">No Image</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td><strong><?php echo htmlspecialchars($titlePreview); ?></strong></td>
-                                        <td><?php echo htmlspecialchars($carouselSlide['tagline'] ?? ''); ?></td>
+                                        <td><strong><?php echo htmlspecialchars((string) ($carouselSlide['title'] ?? 'Homepage image')); ?></strong></td>
+                                        <td><?php echo (int) ($carouselSlide['event_month'] ?? 0) === 0 ? 'All months' : htmlspecialchars(date('F', mktime(0, 0, 0, (int) $carouselSlide['event_month'], 1, 2026))); ?></td>
                                         <td><?php echo (int) ($carouselSlide['sort_order'] ?? 0); ?></td>
                                         <td>
                                             <form method="POST" style="display: inline;">

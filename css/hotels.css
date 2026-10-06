@@ -14,6 +14,7 @@ body { padding-top: 0; }
 .experience-cta { display: block; color: #1d5a3d; font-weight: 600; padding: 0 1.25rem 1.25rem; font-size: 1rem; }
 .experience-item.no-data { text-align: center; padding: 3rem 2rem; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); }
 .controls { max-width: 1200px; margin: 0 auto 2rem; padding: 0 2rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: center; }
+.location-hint { flex-basis: 100%; margin: 0; color: #6b7280; font-size: 0.9rem; text-align: center; }
 .btn-sort { padding: 0.75rem 1rem; background: #1d5a3d; color: white; border: none; border-radius: 25px; cursor: pointer; transition: all 0.3s; font-weight: 500; font-size: 1rem; }
 .home-btn { background: #3b82f6; font-size: 1rem; padding: 0.75rem 1rem; }
 .location-btn { background: #3b82f6; }

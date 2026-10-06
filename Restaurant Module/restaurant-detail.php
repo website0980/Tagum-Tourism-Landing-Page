@@ -1,5 +1,6 @@
 <?php
-$dbFile = '../database.db';
+require_once dirname(__DIR__) . '/includes/database_path.php';
+$dbFile = appDatabasePath();
 $restaurant = null;
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
@@ -410,7 +411,7 @@ if ($restaurant) {
                                 // Ensure table exists (safe idempotent).
                                 ensureRestaurantGalleryTable();
 
-                                $db = new SQLite3('../database.db');
+                                $db = new SQLite3(appDatabasePath());
                                 $stmt = $db->prepare('SELECT image FROM restaurant_gallery WHERE restaurant_id = ? ORDER BY sort_order ASC, id ASC');
                                 $stmt->bindValue(1, (int)$restaurant['id'], SQLITE3_INTEGER);
                                 $result = $stmt->execute();

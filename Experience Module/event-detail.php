@@ -1,5 +1,6 @@
 <?php
-$dbFile = '../database.db';
+require_once dirname(__DIR__) . '/includes/database_path.php';
+$dbFile = appDatabasePath();
 $event = null;
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
@@ -205,6 +206,18 @@ if ($event) {
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
 (function() {
+    const customPinIcon = L.divIcon({
+        className: 'custom-map-pin',
+        html: `
+            <svg width="42" height="52" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="32" cy="32" r="26" fill="none" stroke="#39d96a" stroke-width="4"/>
+                <circle cx="32" cy="32" r="12" fill="none" stroke="#39d96a" stroke-width="4"/>
+            </svg>
+        `,
+        iconSize: [42, 52],
+        iconAnchor: [21, 52],
+        popupAnchor: [0, -42]
+    });
     const eventLat = <?php echo $lat ?: 'null'; ?>;
     const eventLng = <?php echo $lng ?: 'null'; ?>;
     const defaultLat = 7.443;
@@ -217,12 +230,12 @@ if ($event) {
     }).addTo(map);
     
     if (eventLat && eventLng) {
-        L.marker([eventLat, eventLng]).addTo(map)
+        L.marker([eventLat, eventLng], { icon: customPinIcon }).addTo(map)
             .bindPopup('<?php echo addslashes(htmlspecialchars($event['name'] ?? 'Event Location')); ?>')
             .openPopup();
         map.setView([eventLat, eventLng], 16);
     } else {
-        L.marker([defaultLat, defaultLng]).addTo(map)
+        L.marker([defaultLat, defaultLng], { icon: customPinIcon }).addTo(map)
             .bindPopup('Tagum City - Search for "<?php echo addslashes(htmlspecialchars($event['location'] ?? '')); ?>"');
     }
 })();

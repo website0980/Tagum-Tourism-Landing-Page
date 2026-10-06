@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/cli_only.php';
 
 /**
  * Import existing JSON data from /assets/data into MySQL.

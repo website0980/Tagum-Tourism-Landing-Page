@@ -7,6 +7,8 @@
 // (Even though the name says mysqli, it uses SQLite3 extension.)
 
 declare(strict_types=1);
+require_once dirname(__DIR__) . '/includes/database_path.php';
+require_once __DIR__ . '/cli_only.php';
 
 function arg(array $argv, string $name, string $default = ''): string {
     foreach ($argv as $a) {
@@ -25,7 +27,7 @@ if ($projectRoot === false) {
     exit(1);
 }
 
-$dbPath = $projectRoot . '/database.db';
+$dbPath = appDatabasePath();
 if (!file_exists($dbPath)) {
     fwrite(STDERR, "SQLite database file not found: {$dbPath}\n");
     exit(1);

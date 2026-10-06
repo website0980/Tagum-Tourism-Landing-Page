@@ -20,8 +20,11 @@
         <button type="button" class="btn btn-primary" onclick="document.getElementById('image-file').click();">Choose image</button>
     <?php endif; ?>
     <input type="file" id="image-file" name="image_file" accept="image/*" style="display:none;" <?php echo !$image ? 'required' : ''; ?>>
+    <?php if (!empty($enableListingThumbnail)): ?>
+        <input type="file" id="image-thumbnail-file" name="image_thumbnail" accept="image/jpeg" hidden>
+    <?php endif; ?>
     <div id="image-preview" style="margin-top:10px;"></div>
-    <small>Optional. Uploads when you click Save.</small>
+    <small>Optional. Uploads when you click Save.<?php if (!empty($enableListingThumbnail)): ?> A smaller card image is generated automatically.<?php endif; ?></small>
 </div>
 
 <script>
@@ -36,6 +39,48 @@ document.getElementById('image-file').onchange = function(e) {
     }
 };
 </script>
+
+<?php if (!empty($enableListingThumbnail)): ?>
+<script>
+const listingImageForm = document.getElementById('image-file')?.form;
+const listingImageInput = document.getElementById('image-file');
+const listingThumbnailInput = document.getElementById('image-thumbnail-file');
+
+listingImageForm?.addEventListener('submit', async event => {
+    if (listingImageForm.dataset.thumbnailReady === 'true') return;
+    const file = listingImageInput.files[0];
+    if (!file || typeof createImageBitmap !== 'function' || typeof DataTransfer !== 'function') return;
+
+    event.preventDefault();
+    try {
+        const bitmap = await createImageBitmap(file);
+        const scale = Math.min(1, 640 / bitmap.width, 480 / bitmap.height);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+        canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+        bitmap.close();
+
+        const thumbnail = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.78));
+        if (thumbnail) {
+            const transfer = new DataTransfer();
+            const thumbnailName = file.name.replace(/\.[^.]+$/, '') + '-thumb.jpg';
+            transfer.items.add(new File([thumbnail], thumbnailName, { type: 'image/jpeg' }));
+            listingThumbnailInput.files = transfer.files;
+        }
+    } catch (error) {
+        listingThumbnailInput.value = '';
+    }
+
+    listingImageForm.dataset.thumbnailReady = 'true';
+    if (event.submitter) {
+        listingImageForm.requestSubmit(event.submitter);
+    } else {
+        listingImageForm.requestSubmit();
+    }
+});
+</script>
+<?php endif; ?>
 
 <script>
 function updateMediaPath(select) {

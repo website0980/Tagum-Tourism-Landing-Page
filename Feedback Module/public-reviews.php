@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
 require_once __DIR__ . '/../database/setup_feedback.php';
 ensureFeedbackTable();
 
@@ -10,7 +11,7 @@ if (!in_array($establishmentType, ['hotel', 'restaurant'])) {
     $establishmentType = 'hotel';
 }
 
-$dbFile = __DIR__ . '/../database.db';
+$dbFile = appDatabasePath();
 $db = new SQLite3($dbFile);
 
 // Fetch only approved reviews

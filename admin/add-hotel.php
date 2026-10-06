@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
 // Add/Edit Hotel Page - Matches festival pattern
 require_once 'config.php';
 requireAuth();
@@ -77,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Save if no errors (file operations only after validation)
     if (empty($errors)) {
         if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
-            $result = saveHotelImage($_FILES['image_file']);
+            $result = saveHotelImage($_FILES['image_file'], $_FILES['image_thumbnail'] ?? null);
             if ($result['success']) {
                 if (!empty($hotel['image'])) {
                     deleteHotelImage($hotel['image']);
@@ -88,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         if (empty($errors)) {
-            $dbFile = '../database.db';
+            $dbFile = appDatabasePath();
             if (file_exists($dbFile)) {
                 $db = new SQLite3($dbFile);
                 if ($isEdit) {
@@ -326,6 +327,7 @@ $stmt = $db->prepare('INSERT INTO hotel_items (name, description, price, categor
                 <div class="form-section">
                     <h2>Hotel Image</h2>
                     <?php $image = $hotel['image'] ?? ''; ?>
+                    <?php $enableListingThumbnail = true; ?>
                     <?php include 'media-picker.php'; ?>
                 </div>
 
@@ -351,6 +353,18 @@ $stmt = $db->prepare('INSERT INTO hotel_items (name, description, price, categor
     
     <script>
     let map, marker;
+    const customPinIcon = L.divIcon({
+        className: 'custom-map-pin',
+        html: `
+            <svg width="42" height="52" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="32" cy="32" r="26" fill="none" stroke="#39d96a" stroke-width="4"/>
+                <circle cx="32" cy="32" r="12" fill="none" stroke="#39d96a" stroke-width="4"/>
+            </svg>
+        `,
+        iconSize: [42, 52],
+        iconAnchor: [21, 52],
+        popupAnchor: [0, -42]
+    });
     const defaultLat = <?php echo is_numeric($hotel['latitude'] ?? null) ? (float)$hotel['latitude'] : 7.443; ?>;
     const defaultLng = <?php echo is_numeric($hotel['longitude'] ?? null) ? (float)$hotel['longitude'] : 125.807; ?>;
 
@@ -372,7 +386,7 @@ $stmt = $db->prepare('INSERT INTO hotel_items (name, description, price, categor
 
     function ensureMarker(lat, lng) {
         if (!marker) {
-            marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+            marker = L.marker([lat, lng], { draggable: true, icon: customPinIcon }).addTo(map);
             marker.on('dragend', () => updateCoordsFromMarker(true));
         } else {
             marker.setLatLng([lat, lng]);

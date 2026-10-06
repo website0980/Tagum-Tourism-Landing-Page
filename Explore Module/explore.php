@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
 $requestedSection = isset($_GET['section']) && in_array($_GET['section'], ['events', 'festivals'], true)
     ? $_GET['section']
     : 'events';
@@ -47,7 +48,7 @@ $requestedSection = isset($_GET['section']) && in_array($_GET['section'], ['even
 
                 <?php
                 require_once dirname(__DIR__) . '/includes/events_helpers.php';
-                $events = loadEvents(dirname(__DIR__) . '/database.db');
+                $events = loadEvents(appDatabasePath());
                 ?>
 
                 <div class="events-section-wrapper">
@@ -85,9 +86,9 @@ $requestedSection = isset($_GET['section']) && in_array($_GET['section'], ['even
                     <p>Tagum City comes alive with vibrant festivals throughout the year, showcasing the rich traditions, music, dance, and culinary heritage of the region. Experience the warmth and hospitality of the local community.</p>
                     
                     <?php
-                    $dbFile = dirname(__DIR__) . '/database.db';
+                    $dbFile = appDatabasePath();
                     $festivals = [];
-                    $events = loadEvents(dirname(__DIR__) . '/database.db');
+                    $events = loadEvents(appDatabasePath());
                     if (file_exists($dbFile)) {
                         try {
                             $db = new SQLite3($dbFile);

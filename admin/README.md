@@ -10,6 +10,8 @@ The Admin Module is a secure destination management system that allows administr
 - Session-based authentication
 - Automatic redirect to login for unauthorized access
 - Logout functionality
+- Super Admin-managed accounts and custom module permissions
+- Single-use, expiring password-reset links by email
 
 ### 2. **Destination Management**
 - **Add New Destinations**: Create new tourist locations with comprehensive information
@@ -34,13 +36,37 @@ Each destination includes:
 
 ## Getting Started
 
-### Default Credentials
-```
-Username: admin
-Password: tagum2026
-```
+### First Super Admin
+On the first admin login, the system creates the built-in Super Admin account from `ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH` in `config.php`. Sign in with the existing admin credentials, open **Accounts & Roles**, set a verified email address, and change the initial password immediately. The built-in Super Admin role cannot be removed or restricted.
 
-⚠️ **IMPORTANT**: Change these credentials immediately in production!
+To populate the initial account email automatically, set `TAGUM_SUPER_ADMIN_EMAIL` in the PHP server environment before the account tables are first created. Existing accounts can have their email changed in **Accounts & Roles**.
+
+### Accounts, Roles, and Permissions
+- Super Admins can manage all admin accounts and roles.
+- The default `User Manager` role can manage tourism content modules and create, update, deactivate, and reset regular admin accounts. Its own account details are visible read-only.
+- User Managers cannot edit roles, manage their own account, manage other User Managers, or manage Super Admins.
+- To delegate this access, a Super Admin assigns `User Manager` to the trusted account from **Accounts & Roles**. The account then sees **Admin Accounts** and the data-management modules in the dashboard.
+- Only a Super Admin can create or edit roles, or assign Super Admin and User Manager access.
+- The default `Admin` role can manage all content modules but cannot manage accounts or roles.
+- The default `Editor` role can manage content modules and view certification, feedback, and reports.
+- The default `Viewer` role has read-only access to all modules.
+- Custom roles have `None`, `View`, or `Manage` permissions per admin module. `Manage` includes viewing.
+- Permissions are checked on the server for direct page requests and dashboard form submissions.
+- The last active Super Admin cannot be deactivated or demoted.
+- New accounts and password resets require passwords of at least 12 characters.
+
+### Super Admin Support Chat
+- Every signed-in admin can open **Support Chat** from the dashboard and message the Super Admin.
+- The Super Admin sees active admin accounts in an inbox, can reply to each account, and sees unread-message counts.
+- Conversations are private to the account and Super Admin, and are stored in the existing SQLite database.
+
+### Forgot Password Requests
+- From the login page, an admin submits their username or email to request a password change.
+- The app queues the request in SQLite and shows the same confirmation whether or not the account matches.
+- Super Admin sees the pending request count on the dashboard and reviews requests under **Accounts & Roles**.
+- Super Admin sets a new password of at least 12 characters. The password is stored as a hash, and the request closes in the same transaction.
+- The Super Admin gives the new password to the account owner through a verified secure channel. Passwords are not sent by email or displayed again after saving.
+- Existing sessions for the account are invalidated when the password changes. If the Super Admin account itself is locked out, recovery requires server/database operator assistance.
 
 ### Accessing the Admin Panel
 1. Go to your website footer
@@ -128,19 +154,17 @@ assets/
 - **Backup**: Recommended to backup destinations.json regularly
 
 ### Security
-- Session-based authentication
-- Password hash validation (in production, use proper hashing)
-- File upload validation (type and size checks)
-- HTML entity encoding for output (XSS prevention)
-- CSRF protection available via forms
+- Passwords are stored using PHP's password hashing API.
+- Password-change requests do not disclose whether a username or email belongs to an account.
+- Only Super Admin can approve a request; password update and request completion happen in one transaction.
+- Role permissions are enforced server-side, not only through hidden navigation.
+- CSRF protection is used on login, password-request, account, and role forms.
+- Use HTTPS and share temporary passwords through a verified secure channel.
 
 ## Configuration
 
-### Edit Credentials (config.php)
-```php
-define('ADMIN_USERNAME', 'admin');
-define('ADMIN_PASSWORD', 'tagum2026');
-```
+### Database
+Admin users, roles, permissions, and password-change requests are stored in the SQLite database returned by `appDatabasePath()`. The auth tables are created automatically without removing existing tourism data.
 
 ### Max File Size (config.php)
 ```php

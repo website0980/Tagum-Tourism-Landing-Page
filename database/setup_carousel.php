@@ -1,9 +1,11 @@
 <?php
+require_once __DIR__ . '/cli_only.php';
+require_once dirname(__DIR__) . '/includes/database_path.php';
 /**
  * One-time setup: create carousel_slides table and seed default slides.
  * Run: php database/setup_carousel.php
  */
-$dbFile = dirname(__DIR__) . '/database.db';
+$dbFile = appDatabasePath();
 if (!file_exists($dbFile)) {
     fwrite(STDERR, "database.db not found at $dbFile\n");
     exit(1);

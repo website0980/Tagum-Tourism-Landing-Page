@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
 // Admin Module Configuration & Session Management (HARDENED)
 
 // Secure session initialization
@@ -80,6 +81,7 @@ define('ADMIN_PASSWORD_HASH', '$2y$12$7AwD6yF6sJjeSAoexv3xveoehQUipErVu0/oxycCfH
 
 // Session timeout: 30 minutes of inactivity
 define('SESSION_TIMEOUT', 1800);
+require_once __DIR__ . '/auth.php';
 
 define('DESTINATIONS_FILE', dirname(__DIR__) . '/assets/data/destinations.json');
 define('EXPERIENCES_FILE', dirname(__DIR__) . '/assets/data/experiences.json');
@@ -111,33 +113,6 @@ define('RESTAURANT_IMAGES_URL', '../../assets/images/restaurants/');
 define('CAROUSEL_IMAGES_DIR', dirname(__DIR__) . '/images/carousel/');
 define('CAROUSEL_IMAGES_URL', 'images/carousel/');
 
-function isLoggedIn() {
-    if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-        return false;
-    }
-    // Check session timeout
-    if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > SESSION_TIMEOUT)) {
-        logout(false);
-        return false;
-    }
-    $_SESSION['last_activity'] = time();
-    return true;
-}
-
-function requireAuth() {
-    if (!isLoggedIn()) {
-        // Destroy any partial session data before redirect
-        $_SESSION = [];
-        if (ini_get('session.use_cookies')) {
-            $params = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
-        }
-        session_destroy();
-        header('Location: login.php');
-        exit();
-    }
-}
-
 // CSRF Token helpers
 function generateCsrfToken() {
     if (empty($_SESSION['csrf_token'])) {
@@ -161,7 +136,7 @@ function loadDestinations() {
         return $cached;
     }
     
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return [];
     try {
         $db = new SQLite3($dbFile);
@@ -182,7 +157,7 @@ function loadExperiences() {
         return $cached;
     }
     
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return [];
     try {
         $db = new SQLite3($dbFile);
@@ -211,7 +186,7 @@ function loadCulturalSites() {
         return $cached;
     }
     
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return [];
     try {
         require_once dirname(__DIR__) . '/includes/events_helpers.php';
@@ -230,7 +205,7 @@ function loadCulturalSites() {
 function ensureFestivalRelatedEventColumn($db = null) {
     $closeDb = false;
     if ($db === null) {
-        $dbFile = dirname(__DIR__) . '/database.db';
+        $dbFile = appDatabasePath();
         if (!file_exists($dbFile)) {
             return false;
         }
@@ -265,7 +240,7 @@ function loadFestivals() {
         return $cached;
     }
     
-    $dbFile = dirname(__DIR__) . '/database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return [];
     try {
         $db = new SQLite3($dbFile);
@@ -281,7 +256,7 @@ function loadFestivals() {
 }
 
 function saveFestivals(array $festivals) {
-    $dbFile = dirname(__DIR__) . '/database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return false;
 
     try {
@@ -338,7 +313,7 @@ function loadHotels() {
         return $cached;
     }
     
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return [];
     try {
         $db = new SQLite3($dbFile);
@@ -386,7 +361,7 @@ function formatSingleTime24to12($time24) {
 function ensureRestaurantTimeColumns($db = null) {
     $closeDb = false;
     if ($db === null) {
-        $dbFile = dirname(__DIR__) . '/database.db';
+        $dbFile = appDatabasePath();
         if (!file_exists($dbFile)) {
             return false;
         }
@@ -425,7 +400,7 @@ function loadRestaurants() {
         return $cached;
     }
     
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return [];
     try {
         $db = new SQLite3($dbFile);
@@ -442,7 +417,7 @@ function loadRestaurants() {
 
 // CERTIFICATION APPLICATION FUNCTIONS
 function loadAccommodationApplications() {
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return [];
     try {
         $db = new SQLite3($dbFile);
@@ -456,7 +431,7 @@ function loadAccommodationApplications() {
 }
 
 function loadAccommodationApplicationById($id) {
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return null;
     try {
         $db = new SQLite3($dbFile);
@@ -472,7 +447,7 @@ function loadAccommodationApplicationById($id) {
 }
 
 function updateApplicationStatus($id, $status) {
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return false;
     try {
         $db = new SQLite3($dbFile);
@@ -486,7 +461,7 @@ function updateApplicationStatus($id, $status) {
 }
 
 function deleteAccommodationApplication($id) {
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return false;
     try {
         $db = new SQLite3($dbFile);
@@ -661,7 +636,23 @@ function deleteImage($pathOrFileName) {
     return !file_exists($filePath);
 }
 
-function saveHotelImage($file) {
+function saveListingImageThumbnail($thumbnailFile, $directory, $originalFileName) {
+    if (!is_array($thumbnailFile) || ($thumbnailFile['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        return false;
+    }
+
+    $validation = validateImageUpload($thumbnailFile);
+    $imageInfo = @getimagesize($thumbnailFile['tmp_name']);
+    if (!$validation['success'] || !$imageInfo || ($imageInfo['mime'] ?? '') !== 'image/jpeg') {
+        return false;
+    }
+
+    $thumbnailName = pathinfo($originalFileName, PATHINFO_FILENAME) . '-thumb.jpg';
+    $thumbnailPath = rtrim($directory, '/\\') . DIRECTORY_SEPARATOR . $thumbnailName;
+    return move_uploaded_file($thumbnailFile['tmp_name'], $thumbnailPath);
+}
+
+function saveHotelImage($file, $thumbnailFile = null) {
     $validation = validateImageUpload($file);
     if (!$validation['success']) return $validation;
     if (!is_dir(HOTEL_IMAGES_DIR)) mkdir(HOTEL_IMAGES_DIR, 0755, true);
@@ -674,6 +665,8 @@ function saveHotelImage($file) {
     if (!$processResult['success']) {
         return ['success' => false, 'error' => $processResult['error']];
     }
+
+    saveListingImageThumbnail($thumbnailFile, HOTEL_IMAGES_DIR, $fileName);
     
     return ['success' => true, 'fileName' => $fileName, 'path' => HOTEL_IMAGES_URL . $fileName];
 }
@@ -683,10 +676,12 @@ function deleteHotelImage($pathOrFileName) {
     if (empty($fileName)) return false;
     $filePath = HOTEL_IMAGES_DIR . $fileName;
     if (file_exists($filePath)) unlink($filePath);
+    $thumbnailPath = HOTEL_IMAGES_DIR . pathinfo($fileName, PATHINFO_FILENAME) . '-thumb.jpg';
+    if (file_exists($thumbnailPath)) unlink($thumbnailPath);
     return !file_exists($filePath);
 }
 
-function saveRestaurantImage($file) {
+function saveRestaurantImage($file, $thumbnailFile = null) {
     $validation = validateImageUpload($file);
     if (!$validation['success']) return $validation;
     if (!is_dir(RESTAURANT_IMAGES_DIR)) mkdir(RESTAURANT_IMAGES_DIR, 0755, true);
@@ -699,6 +694,8 @@ function saveRestaurantImage($file) {
     if (!$processResult['success']) {
         return ['success' => false, 'error' => $processResult['error']];
     }
+
+    saveListingImageThumbnail($thumbnailFile, RESTAURANT_IMAGES_DIR, $fileName);
     
     return ['success' => true, 'fileName' => $fileName, 'path' => RESTAURANT_IMAGES_URL . $fileName];
 }
@@ -708,6 +705,8 @@ function deleteRestaurantImage($pathOrFileName) {
     if (empty($fileName)) return false;
     $filePath = RESTAURANT_IMAGES_DIR . $fileName;
     if (file_exists($filePath)) unlink($filePath);
+    $thumbnailPath = RESTAURANT_IMAGES_DIR . pathinfo($fileName, PATHINFO_FILENAME) . '-thumb.jpg';
+    if (file_exists($thumbnailPath)) unlink($thumbnailPath);
     return !file_exists($filePath);
 }
 
@@ -755,7 +754,7 @@ function deleteFestivalImage($pathOrFileName) {
 
 // DB CRUD functions for hotels and restaurants
 function deleteHotel($id) {
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return false;
     try {
         $db = new SQLite3($dbFile);
@@ -779,7 +778,7 @@ function deleteHotel($id) {
 }
 
 function toggleHotelFeatured($id) {
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return false;
     try {
         $db = new SQLite3($dbFile);
@@ -795,7 +794,7 @@ function toggleHotelFeatured($id) {
 }
 
 function deleteRestaurant($id) {
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return false;
     try {
         $db = new SQLite3($dbFile);
@@ -819,7 +818,7 @@ function deleteRestaurant($id) {
 }
 
 function toggleRestaurantFeatured($id) {
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return false;
     try {
         $db = new SQLite3($dbFile);
@@ -835,7 +834,7 @@ function toggleRestaurantFeatured($id) {
 }
 
 function saveDestination($data, $id = null) {
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return false;
     try {
         $db = new SQLite3($dbFile);
@@ -887,7 +886,7 @@ function saveDestination($data, $id = null) {
 }
 
 function toggleDestinationFeatured($id) {
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return false;
     try {
         $db = new SQLite3($dbFile);
@@ -903,7 +902,7 @@ function toggleDestinationFeatured($id) {
 }
 
 function deleteDestination($id) {
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return false;
     try {
         $db = new SQLite3($dbFile);
@@ -942,9 +941,156 @@ function saveExperiences($experiences) {
     return false;
 }
 
+function ensureHomepageSettingsTable() {
+    $dbFile = appDatabasePath();
+    if (!file_exists($dbFile)) {
+        return false;
+    }
+
+    try {
+        $db = new SQLite3($dbFile);
+        $db->exec('CREATE TABLE IF NOT EXISTS homepage_settings (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            hero_title TEXT NOT NULL DEFAULT "FLORES\nDE MAYO",
+            hero_script TEXT NOT NULL DEFAULT "Faith in Bloom.",
+            hero_description TEXT NOT NULL DEFAULT "A colorful celebration of faith, devotion, and community, bringing Tagumenyos together through flowers, traditions, and cultural heritage.",
+            hero_cta TEXT NOT NULL DEFAULT "EXPLORE FESTIVAL",
+            hero_theme TEXT NOT NULL DEFAULT "theme-soft",
+            default_month INTEGER NOT NULL DEFAULT 5,
+            hero_meta_1 TEXT NOT NULL DEFAULT "Tradition",
+            hero_meta_2 TEXT NOT NULL DEFAULT "Fortune",
+            hero_meta_3 TEXT NOT NULL DEFAULT "Unity",
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )');
+
+        $columnsResult = $db->query('PRAGMA table_info(homepage_settings)');
+        $columns = [];
+        while ($column = $columnsResult->fetchArray(SQLITE3_ASSOC)) {
+            $columns[] = $column['name'];
+        }
+
+        $missingColumns = [];
+        foreach (['hero_meta_1', 'hero_meta_2', 'hero_meta_3'] as $column) {
+            if (!in_array($column, $columns, true)) {
+                $missingColumns[] = $column;
+            }
+        }
+
+        foreach ($missingColumns as $column) {
+            $db->exec('ALTER TABLE homepage_settings ADD COLUMN ' . $column . ' TEXT NOT NULL DEFAULT "' . ($column === 'hero_meta_1' ? 'Tradition' : ($column === 'hero_meta_2' ? 'Fortune' : 'Unity')) . '"');
+        }
+
+        $existing = $db->querySingle('SELECT COUNT(*) FROM homepage_settings');
+        if ((int) $existing === 0) {
+            $db->exec('INSERT INTO homepage_settings (id, hero_title, hero_script, hero_description, hero_cta, hero_theme, default_month, hero_meta_1, hero_meta_2, hero_meta_3) VALUES (1, "FLORES\nDE MAYO", "Faith in Bloom.", "A colorful celebration of tradition, fortune, and unity, bringing Tagumenyos together through flowers, cultural heritage, and shared community spirit.", "EXPLORE FESTIVAL", "theme-soft", 5, "Tradition", "Fortune", "Unity")');
+        }
+        $db->close();
+        return true;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+function loadHomepageSettings(): array {
+    ensureHomepageSettingsTable();
+    $dbFile = appDatabasePath();
+    if (!file_exists($dbFile)) {
+        return [
+            'hero_title' => "FLORES\nDE MAYO",
+            'hero_script' => 'Faith in Bloom.',
+            'hero_description' => 'A colorful celebration of faith, devotion, and community, bringing Tagumenyos together through flowers, traditions, and cultural heritage.',
+            'hero_cta' => 'EXPLORE FESTIVAL',
+            'hero_theme' => 'theme-soft',
+            'default_month' => 5,
+        ];
+    }
+
+    try {
+        $db = new SQLite3($dbFile);
+        $row = $db->querySingle('SELECT hero_title, hero_script, hero_description, hero_cta, hero_theme, default_month, hero_meta_1, hero_meta_2, hero_meta_3 FROM homepage_settings WHERE id = 1', true);
+        $db->close();
+
+        if (!$row) {
+            return [
+                'hero_title' => "FLORES\nDE MAYO",
+                'hero_script' => 'Faith in Bloom.',
+                'hero_description' => 'A colorful celebration of faith, devotion, and community, bringing Tagumenyos together through flowers, traditions, and cultural heritage.',
+                'hero_cta' => 'EXPLORE FESTIVAL',
+                'hero_theme' => 'theme-soft',
+                'default_month' => 5,
+                'hero_meta_1' => 'Tradition',
+                'hero_meta_2' => 'Fortune',
+                'hero_meta_3' => 'Unity',
+            ];
+        }
+
+        return [
+            'hero_title' => trim((string) ($row['hero_title'] ?? "FLORES\nDE MAYO")),
+            'hero_script' => trim((string) ($row['hero_script'] ?? 'Faith in Bloom.')),
+            'hero_description' => trim((string) ($row['hero_description'] ?? 'A colorful celebration of tradition, fortune, and unity, bringing Tagumenyos together through flowers, cultural heritage, and shared community spirit.')),
+            'hero_cta' => trim((string) ($row['hero_cta'] ?? 'EXPLORE FESTIVAL')),
+            'hero_theme' => in_array((string) ($row['hero_theme'] ?? 'theme-soft'), ['theme-rich', 'theme-soft', 'theme-chinese-new-year'], true) ? (string) $row['hero_theme'] : 'theme-soft',
+            'default_month' => max(1, min(12, (int) ($row['default_month'] ?? 5))),
+            'hero_meta_1' => trim((string) ($row['hero_meta_1'] ?? 'Tradition')),
+            'hero_meta_2' => trim((string) ($row['hero_meta_2'] ?? 'Fortune')),
+            'hero_meta_3' => trim((string) ($row['hero_meta_3'] ?? 'Unity')),
+        ];
+    } catch (Exception $e) {
+        return [
+            'hero_title' => "FLORES\nDE MAYO",
+            'hero_script' => 'Faith in Bloom.',
+            'hero_description' => 'A colorful celebration of tradition, fortune, and unity, bringing Tagumenyos together through flowers, cultural heritage, and shared community spirit.',
+            'hero_cta' => 'EXPLORE FESTIVAL',
+            'hero_theme' => 'theme-soft',
+            'default_month' => 5,
+            'hero_meta_1' => 'Tradition',
+            'hero_meta_2' => 'Fortune',
+            'hero_meta_3' => 'Unity',
+        ];
+    }
+}
+
+function saveHomepageSettings(array $data): bool {
+    ensureHomepageSettingsTable();
+    $dbFile = appDatabasePath();
+    if (!file_exists($dbFile)) {
+        return false;
+    }
+
+    try {
+        $db = new SQLite3($dbFile);
+        $heroTitle = trim((string) ($data['hero_title'] ?? "FLORES\nDE MAYO"));
+        $heroScript = trim((string) ($data['hero_script'] ?? 'Faith in Bloom.'));
+        $heroDescription = trim((string) ($data['hero_description'] ?? 'A colorful celebration of tradition, fortune, and unity, bringing Tagumenyos together through flowers, cultural heritage, and shared community spirit.'));
+        $heroCta = trim((string) ($data['hero_cta'] ?? 'EXPLORE FESTIVAL'));
+        $heroTheme = in_array((string) ($data['hero_theme'] ?? 'theme-soft'), ['theme-rich', 'theme-soft', 'theme-chinese-new-year'], true) ? (string) $data['hero_theme'] : 'theme-soft';
+        $defaultMonth = max(1, min(12, (int) ($data['default_month'] ?? 5)));
+
+        $heroMeta1 = trim((string) ($data['hero_meta_1'] ?? 'Tradition'));
+        $heroMeta2 = trim((string) ($data['hero_meta_2'] ?? 'Fortune'));
+        $heroMeta3 = trim((string) ($data['hero_meta_3'] ?? 'Unity'));
+
+        $stmt = $db->prepare('INSERT OR REPLACE INTO homepage_settings (id, hero_title, hero_script, hero_description, hero_cta, hero_theme, default_month, hero_meta_1, hero_meta_2, hero_meta_3, updated_at) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)');
+        $stmt->bindValue(1, $heroTitle, SQLITE3_TEXT);
+        $stmt->bindValue(2, $heroScript, SQLITE3_TEXT);
+        $stmt->bindValue(3, $heroDescription, SQLITE3_TEXT);
+        $stmt->bindValue(4, $heroCta, SQLITE3_TEXT);
+        $stmt->bindValue(5, $heroTheme, SQLITE3_TEXT);
+        $stmt->bindValue(6, $defaultMonth, SQLITE3_INTEGER);
+        $stmt->bindValue(7, $heroMeta1, SQLITE3_TEXT);
+        $stmt->bindValue(8, $heroMeta2, SQLITE3_TEXT);
+        $stmt->bindValue(9, $heroMeta3, SQLITE3_TEXT);
+        $stmt->execute();
+        $db->close();
+        return true;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
 // CAROUSEL FUNCTIONS
 function ensureCarouselTable() {
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return false;
     try {
         $db = new SQLite3($dbFile);
@@ -952,22 +1098,16 @@ function ensureCarouselTable() {
         if ($schema) {
             $db->exec($schema);
         }
-        $count = (int) $db->querySingle('SELECT COUNT(*) FROM carousel_slides');
-        if ($count === 0) {
-            $defaults = [
-                ['Tagumeños: Beauty that Shines from Within.', "Discover\nNatural Beauty", 'Tagumeños are a reflection of true natural beauty radiating warmth, kindness, and genuine smiles that make everyone feel welcome.', 'images/Background for slide 1.jpg', 1],
-                ['Cultural heritage meets modern charm', "Experience\nLocal Culture", 'Immerse yourself in the vibrant traditions, local cuisine, and warm hospitality of Tagum City. Discover authentic experiences that celebrate our rich heritage.', 'images/Background for slide 2 .jpg', 2],
-                ['Tagum Adventures: Feel the Thrill, Live the Moment', "Thrilling\nAdventures", 'Step into the excitement that awaits in Tagum where every journey is filled with adrenaline, discovery, and unforgettable moments. From outdoor explorations to vibrant city experiences, adventure is always just around the corner.', 'images/Background for slide 3.jpg', 3],
-            ];
-            $stmt = $db->prepare('INSERT INTO carousel_slides (tagline, title, description, image, sort_order, active) VALUES (?, ?, ?, ?, ?, 1)');
-            foreach ($defaults as $row) {
-                $stmt->bindValue(1, $row[0], SQLITE3_TEXT);
-                $stmt->bindValue(2, $row[1], SQLITE3_TEXT);
-                $stmt->bindValue(3, $row[2], SQLITE3_TEXT);
-                $stmt->bindValue(4, $row[3], SQLITE3_TEXT);
-                $stmt->bindValue(5, $row[4], SQLITE3_INTEGER);
-                $stmt->execute();
+        $columnsResult = $db->query('PRAGMA table_info(carousel_slides)');
+        $hasEventMonth = false;
+        while ($column = $columnsResult->fetchArray(SQLITE3_ASSOC)) {
+            if ($column['name'] === 'event_month') {
+                $hasEventMonth = true;
+                break;
             }
+        }
+        if (!$hasEventMonth) {
+            $db->exec('ALTER TABLE carousel_slides ADD COLUMN event_month INTEGER NOT NULL DEFAULT 0');
         }
         $db->close();
         return true;
@@ -978,7 +1118,7 @@ function ensureCarouselTable() {
 
 function loadCarouselSlides($activeOnly = false) {
     ensureCarouselTable();
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return [];
     try {
         $db = new SQLite3($dbFile);
@@ -999,7 +1139,7 @@ function loadCarouselSlides($activeOnly = false) {
 
 function getCarouselSlideById($id) {
     ensureCarouselTable();
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return null;
     try {
         $db = new SQLite3($dbFile);
@@ -1037,12 +1177,12 @@ function deleteCarouselImage($pathOrFileName) {
 
 function saveCarouselSlide($data, $id = null) {
     ensureCarouselTable();
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return false;
     try {
         $db = new SQLite3($dbFile);
         if ($id === null) {
-            $stmt = $db->prepare('INSERT INTO carousel_slides (tagline, title, description, image, btn_primary_text, btn_primary_link, btn_secondary_text, btn_secondary_link, sort_order, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+            $stmt = $db->prepare('INSERT INTO carousel_slides (tagline, title, description, image, btn_primary_text, btn_primary_link, btn_secondary_text, btn_secondary_link, sort_order, active, event_month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
             $stmt->bindValue(1, $data['tagline'] ?? '', SQLITE3_TEXT);
             $stmt->bindValue(2, $data['title'] ?? '', SQLITE3_TEXT);
             $stmt->bindValue(3, $data['description'] ?? '', SQLITE3_TEXT);
@@ -1053,12 +1193,13 @@ function saveCarouselSlide($data, $id = null) {
             $stmt->bindValue(8, $data['btn_secondary_link'] ?? '#explore', SQLITE3_TEXT);
             $stmt->bindValue(9, isset($data['sort_order']) ? (int)$data['sort_order'] : 0, SQLITE3_INTEGER);
             $stmt->bindValue(10, isset($data['active']) ? (int)$data['active'] : 1, SQLITE3_INTEGER);
+            $stmt->bindValue(11, max(0, min(12, (int) ($data['event_month'] ?? 0))), SQLITE3_INTEGER);
             $stmt->execute();
             $newId = $db->lastInsertRowID();
             $db->close();
             return $newId;
         }
-        $stmt = $db->prepare('UPDATE carousel_slides SET tagline=?, title=?, description=?, image=?, btn_primary_text=?, btn_primary_link=?, btn_secondary_text=?, btn_secondary_link=?, sort_order=?, active=? WHERE id=?');
+        $stmt = $db->prepare('UPDATE carousel_slides SET tagline=?, title=?, description=?, image=?, btn_primary_text=?, btn_primary_link=?, btn_secondary_text=?, btn_secondary_link=?, sort_order=?, active=?, event_month=? WHERE id=?');
         $stmt->bindValue(1, $data['tagline'] ?? '', SQLITE3_TEXT);
         $stmt->bindValue(2, $data['title'] ?? '', SQLITE3_TEXT);
         $stmt->bindValue(3, $data['description'] ?? '', SQLITE3_TEXT);
@@ -1069,7 +1210,8 @@ function saveCarouselSlide($data, $id = null) {
         $stmt->bindValue(8, $data['btn_secondary_link'] ?? '#explore', SQLITE3_TEXT);
         $stmt->bindValue(9, isset($data['sort_order']) ? (int)$data['sort_order'] : 0, SQLITE3_INTEGER);
         $stmt->bindValue(10, isset($data['active']) ? (int)$data['active'] : 1, SQLITE3_INTEGER);
-        $stmt->bindValue(11, (int)$id, SQLITE3_INTEGER);
+        $stmt->bindValue(11, max(0, min(12, (int) ($data['event_month'] ?? 0))), SQLITE3_INTEGER);
+        $stmt->bindValue(12, (int)$id, SQLITE3_INTEGER);
         $stmt->execute();
         $affected = $db->changes();
         $db->close();
@@ -1081,7 +1223,7 @@ function saveCarouselSlide($data, $id = null) {
 
 function deleteCarouselSlide($id) {
     ensureCarouselTable();
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return false;
     try {
         $db = new SQLite3($dbFile);
@@ -1104,7 +1246,7 @@ function deleteCarouselSlide($id) {
 
 function toggleCarouselSlideActive($id) {
     ensureCarouselTable();
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return false;
     try {
         $db = new SQLite3($dbFile);
@@ -1132,6 +1274,3 @@ function logout($redirect = true) {
         exit();
     }
 }
-?>
-
-

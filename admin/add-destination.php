@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
 // Add/Edit Destination Page
 require_once 'config.php';
 requireAuth();
@@ -25,7 +26,7 @@ $destination = [
 
 // If editing, load single record by id
 if ($isEdit) {
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (file_exists($dbFile)) {
         try {
             $db = new SQLite3($dbFile);

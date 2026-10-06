@@ -44,7 +44,7 @@ function getModuleLinksRegistry() {
     return [
         'accommodation_certification' => [
             'short_label' => 'Certification Application',
-            'icon' => '📋',
+            'icon' => '<svg class="mini-doc-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M19 14h18l9 9v27a4 4 0 0 1-4 4H19a4 4 0 0 1-4-4V18a4 4 0 0 1 4-4zm18 5v9h9" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 31h18M22 42h18" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>',
             'paths' => [
                 'from_root' => 'Certification Module/accommodation-form.php',
                 'from_hotel_module' => '../Certification Module/accommodation-form.php',

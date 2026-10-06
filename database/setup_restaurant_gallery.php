@@ -1,8 +1,9 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
 // Creates restaurant gallery table in database.db (idempotent).
 
 function ensureRestaurantGalleryTable(): void {
-    $dbPath = dirname(__DIR__) . '/database.db';
+    $dbPath = appDatabasePath();
     if (!file_exists($dbPath)) {
         throw new RuntimeException('SQLite database file not found: ' . $dbPath);
     }
@@ -27,6 +28,10 @@ function ensureRestaurantGalleryTable(): void {
 
 // If executed directly, run the setup.
 if (realpath($_SERVER['SCRIPT_FILENAME']) === realpath(__FILE__)) {
+    if (PHP_SAPI !== 'cli') {
+        http_response_code(404);
+        exit('Not found.');
+    }
     ensureRestaurantGalleryTable();
     echo "restaurant_gallery table ready.\n";
 }

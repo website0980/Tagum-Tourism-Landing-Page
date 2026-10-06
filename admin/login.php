@@ -1,6 +1,5 @@
 <?php
 // Admin Login Page - Hardened
-session_start();
 require_once 'config.php';
 
 $error = '';
@@ -31,11 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_SESSION['login_attempts'] ?? 0) 
     // Validate CSRF token
     if (!validateCsrfToken($csrf)) {
         $error = 'Invalid or expired session. Please refresh and try again.';
-    } elseif ($username === ADMIN_USERNAME && password_verify($password, ADMIN_PASSWORD_HASH)) {
+    } elseif (($user = getAdminUserByLogin($username)) && password_verify($password, $user['password_hash'])) {
         // Successful login: regenerate session ID to prevent fixation
         session_regenerate_id(true);
         $_SESSION['admin_logged_in'] = true;
-        $_SESSION['admin_username'] = $username;
+        $_SESSION['admin_user_id'] = (int)$user['id'];
+        $_SESSION['admin_username'] = $user['username'];
+        $_SESSION['admin_password_fingerprint'] = hash('sha256', $user['password_hash']);
         $_SESSION['last_activity'] = time();
         $_SESSION['login_attempts'] = 0;
         header('Location: dashboard.php');
@@ -81,14 +82,14 @@ if (isLoggedIn()) {
                 <?php endif; ?>
 
                 <div class="form-group">
-                    <label for="username">Username</label>
+                    <label for="username">Username or email</label>
                     <input
                         type="text"
                         id="username"
                         name="username"
                         required
                         autofocus
-                        placeholder="Enter your username"
+                        placeholder="Enter your username or email"
                         class="form-control"
                         autocomplete="username"
                     >
@@ -110,6 +111,9 @@ if (isLoggedIn()) {
                 <button type="submit" class="login-btn" <?php echo (($_SESSION['login_attempts'] ?? 0) >= 5) ? 'disabled' : ''; ?>>Login</button>
             </form>
 
+            <div class="back-to-site">
+                <a href="forgot-password.php">Forgot password?</a>
+            </div>
 
             <div class="back-to-site">
 <a href="../../index.php">← Back to Website</a>

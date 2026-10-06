@@ -1,12 +1,13 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
 require_once dirname(__DIR__) . '/includes/accommodation_form_helpers.php';
 
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $application = null;
 
-if ($id > 0 && file_exists(dirname(__DIR__) . '/database.db')) {
+if ($id > 0 && file_exists(appDatabasePath())) {
     ensureAccommodationApplicationsTable();
-    $db = new SQLite3(dirname(__DIR__) . '/database.db');
+    $db = new SQLite3(appDatabasePath());
     $stmt = $db->prepare('SELECT establishment_name, application_date, created_at FROM accommodation_applications WHERE id = ?');
     $stmt->bindValue(1, $id, SQLITE3_INTEGER);
     $result = $stmt->execute();

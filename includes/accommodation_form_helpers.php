@@ -1,9 +1,10 @@
 <?php
+require_once __DIR__ . '/database_path.php';
 
 function ensureAccommodationApplicationsTable($db = null) {
     $closeDb = false;
     if ($db === null) {
-        $dbFile = dirname(__DIR__) . '/database.db';
+        $dbFile = appDatabasePath();
         if (!file_exists($dbFile)) {
             return false;
         }
@@ -50,7 +51,7 @@ function ensureAccommodationApplicationsTable($db = null) {
 }
 
 function saveAccommodationApplication(array $data) {
-    $dbFile = dirname(__DIR__) . '/database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) {
         return false;
     }

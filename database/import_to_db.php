@@ -1,9 +1,11 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
+require_once __DIR__ . '/cli_only.php';
 // No require config - hardcode paths
 define('ROOT_DIR', __DIR__ . '/..');
 
 // Simple SQLite PDO
-$db = new PDO('sqlite:database.db');
+$db = new PDO('sqlite:' . appDatabasePath());
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 // Function to insert if not exists

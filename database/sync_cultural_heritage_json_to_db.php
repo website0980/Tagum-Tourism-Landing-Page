@@ -6,6 +6,8 @@
 //   php database/sync_cultural_heritage_json_to_db.php --truncate=1
 
 declare(strict_types=1);
+require_once __DIR__ . '/cli_only.php';
+require_once dirname(__DIR__) . '/includes/database_path.php';
 
 function arg(array $argv, string $name, string $default = ''): string {
     foreach ($argv as $a) {
@@ -24,7 +26,7 @@ if ($projectRoot === false) {
     exit(1);
 }
 
-$dbPath = $projectRoot . '/database.db';
+$dbPath = appDatabasePath();
 if (!file_exists($dbPath)) {
     fwrite(STDERR, "SQLite database file not found: {$dbPath}\n");
     exit(1);

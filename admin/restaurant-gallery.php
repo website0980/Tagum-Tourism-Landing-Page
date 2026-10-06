@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
 require_once 'config.php';
 requireAuth();
 
@@ -44,7 +45,7 @@ function handleUploadForRestaurant(int $restaurantId): void {
         }
     }
 
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) {
         throw new RuntimeException('Database not found');
     }
@@ -122,7 +123,7 @@ function handleDeleteForRestaurant(): void {
     $deleteId = (int)$_POST['delete_gallery_id'];
     if ($deleteId <= 0) return;
 
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return;
 
     $db = new SQLite3($dbFile);
@@ -147,7 +148,7 @@ function handleDeleteForRestaurant(): void {
 
 function loadGalleryForRestaurant(int $restaurantId): array {
     if ($restaurantId <= 0) return [];
-    $dbFile = '../database.db';
+    $dbFile = appDatabasePath();
     if (!file_exists($dbFile)) return [];
 
     $db = new SQLite3($dbFile);

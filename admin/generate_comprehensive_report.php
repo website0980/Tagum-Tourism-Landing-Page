@@ -4,8 +4,6 @@
  * Generates a professional multi-page PDF report for hotel and restaurant feedback
  */
 
-session_start();
-
 require_once __DIR__ . '/../lib/fpdf.php';
 require_once __DIR__ . '/report_helpers.php';
 

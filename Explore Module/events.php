@@ -1,4 +1,7 @@
-<?php $tab = $_GET['tab'] ?? ''; ?>
+<?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
+$tab = $_GET['tab'] ?? '';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -61,13 +64,13 @@
 
     <section class="experiences">
         <div class="controls" style="display:none;">
-            <button id="get-home" class="btn-sort home-btn">🏠 Home</button>
-            <button id="get-location" class="btn-sort location-btn">📍 Scan</button>
+            <button id="get-home" class="btn-sort home-btn"><span class="btn-icon"><svg class="simple-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 30L32 14l20 16v20a4 4 0 0 1-4 4H32V36H20v18H16a4 4 0 0 1-4-4V30z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg></span> Home</button>
+            <button id="get-location" class="btn-sort location-btn"><span class="btn-icon"><svg class="simple-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 8c-9.7 0-17 7.4-17 16.7 0 12.8 17 30.3 17 30.3s17-17.5 17-30.3C49 15.4 41.7 8 32 8zm0 22.9A8.7 8.7 0 1 1 32 13.5a8.7 8.7 0 0 1 0 17.4z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg></span> Scan</button>
         </div>
 
         <?php
         require_once dirname(__DIR__) . '/includes/events_helpers.php';
-        $events = loadEvents(dirname(__DIR__) . '/database.db');
+        $events = loadEvents(appDatabasePath());
         $userLat = isset($_GET['lat']) ? floatval($_GET['lat']) : null;
         $userLng = isset($_GET['lng']) ? floatval($_GET['lng']) : null;
         $sortByDistance = $userLat !== null && $userLng !== null;

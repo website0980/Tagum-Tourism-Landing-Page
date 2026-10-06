@@ -9,27 +9,32 @@
     <link rel="stylesheet" href="../css/restaurants.css">
 </head>
 <body>
-<?php 
+<?php require_once dirname(__DIR__) . '/includes/database_path.php';
+
 include '../navbar.php';
 require_once '../admin/config.php';
+require_once dirname(__DIR__) . '/includes/listing_images.php';
 ?>
 
     <section class="experiences">
         <?php
-        $userLat = isset($_GET['lat']) ? floatval($_GET['lat']) : null;
-        $userLng = isset($_GET['lng']) ? floatval($_GET['lng']) : null;
+        $userLatValue = $_GET['lat'] ?? null;
+        $userLngValue = $_GET['lng'] ?? null;
+        $userLat = is_numeric($userLatValue) && (float)$userLatValue >= -90 && (float)$userLatValue <= 90 ? (float)$userLatValue : null;
+        $userLng = is_numeric($userLngValue) && (float)$userLngValue >= -180 && (float)$userLngValue <= 180 ? (float)$userLngValue : null;
         $sortByDistance = $userLat !== null && $userLng !== null;
         ?>
 
         <div class="controls" aria-label="Location controls">
-            <button id="get-location" class="btn-sort location-btn">📍 My Location</button>
+            <button id="get-location" class="btn-sort location-btn" aria-describedby="location-instruction">📍 My Location</button>
+            <p class="location-hint" id="location-instruction"><?php echo $sortByDistance ? 'Showing distances from your shared location.' : 'Share your location to calculate distances.'; ?></p>
         </div>
 
         <h2>Restaurants<?php echo $sortByDistance ? ' (Sorted by Distance)' : ''; ?></h2>
 
         <div class="experiences-grid" id="restaurant-grid">
             <?php
-            $dbFile = '../database.db';
+            $dbFile = appDatabasePath();
             $restaurants = [];
             
             function haversineDistance($lat1, $lon1, $lat2, $lon2) {
@@ -45,8 +50,8 @@ require_once '../admin/config.php';
                 $db = new SQLite3($dbFile);
                 $result = $db->query('SELECT * FROM restaurant_items ORDER BY id DESC');
                 while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                    $row['distance'] = 0.0;
-                    if ($sortByDistance && !is_null($row['latitude']) && !is_null($row['longitude'])) {
+                    $row['distance'] = null;
+                    if ($sortByDistance && isset($row['latitude'], $row['longitude']) && is_numeric($row['latitude']) && is_numeric($row['longitude']) && (float)$row['latitude'] >= -90 && (float)$row['latitude'] <= 90 && (float)$row['longitude'] >= -180 && (float)$row['longitude'] <= 180) {
                         $row['distance'] = haversineDistance($userLat, $userLng, $row['latitude'], $row['longitude']);
                     }
                     $restaurants[] = $row;
@@ -55,6 +60,9 @@ require_once '../admin/config.php';
                 
                 if ($sortByDistance) {
                     usort($restaurants, function($a, $b) {
+                        if ($a['distance'] === null || $b['distance'] === null) {
+                            return $a['distance'] === $b['distance'] ? 0 : ($a['distance'] === null ? 1 : -1);
+                        }
                         return $a['distance'] <=> $b['distance'];
                     });
                 }
@@ -62,18 +70,7 @@ require_once '../admin/config.php';
             foreach ($restaurants as $restaurant): ?>
             <a href="restaurant-detail.php?id=<?php echo $restaurant['id']; ?>" class="experience-item">
                 <?php if (!empty($restaurant['image'])): ?>
-                    <?php 
-                        $restaurantImagePath = $restaurant['image'];
-                        // Fix image path for Restaurant Module subdirectory
-                        if (strpos($restaurantImagePath, 'images/') === 0) {
-                            $restaurantImagePath = '../' . $restaurantImagePath;
-                        } elseif (strpos($restaurantImagePath, 'assets/') === 0) {
-                            $restaurantImagePath = '../' . $restaurantImagePath;
-                        } elseif (strpos($restaurantImagePath, '../../') === 0) {
-                            $restaurantImagePath = str_replace('../../', '../', $restaurantImagePath);
-                        }
-                    ?>
-                    <img src="<?php echo htmlspecialchars($restaurantImagePath ?? '', ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($restaurant['name'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" loading="lazy">
+                    <img src="<?php echo htmlspecialchars(listingImagePath($restaurant['image'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($restaurant['name'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" loading="lazy" decoding="async" width="640" height="480">
                 <?php else: ?>
                     <img src="../assets/images/experience-default.jpg" alt="<?php echo htmlspecialchars($restaurant['category'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" loading="lazy">
                 <?php endif; ?>
@@ -106,7 +103,9 @@ require_once '../admin/config.php';
                         </div>
                     </div>
                 <?php endif; ?>
-                <span class="experience-cta distance"><?php echo number_format($restaurant['distance'], 1); ?> km away</span>
+                <?php if ($sortByDistance): ?>
+                    <span class="experience-cta distance"><?php echo $restaurant['distance'] === null ? 'Location unavailable' : number_format($restaurant['distance'], 1) . ' km away'; ?></span>
+                <?php endif; ?>
             </a>
             <?php endforeach; ?>
             <?php if (empty($restaurants)): ?>

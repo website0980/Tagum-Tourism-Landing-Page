@@ -1,4 +1,6 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
+require_once __DIR__ . '/cli_only.php';
 // Auto-sync JSON files to SQLite DB - Run this manually or via cron
 $jsonFiles = [
     'experiences' => 'assets/data/experiences.json',
@@ -8,7 +10,7 @@ $jsonFiles = [
     'natural_wonders' => 'assets/data/natural-wonders.json',
 ];
 
-$db = new PDO('sqlite:../database.db');
+$db = new PDO('sqlite:' . appDatabasePath());
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 foreach ($jsonFiles as $table => $jsonPath) {

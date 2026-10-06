@@ -1,9 +1,10 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
 // Start session at the very beginning
 session_start();
 
 // Load destinations from SQLite database (same as admin)
-$dbFile = dirname(__DIR__) . '/database.db';
+$dbFile = appDatabasePath();
 $destinations = [];
 
 if (file_exists($dbFile)) {

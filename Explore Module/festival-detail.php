@@ -1,3 +1,4 @@
+<?php require_once dirname(__DIR__) . '/includes/database_path.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,7 +66,7 @@
             <a href="explore.php?section=festivals" class="back-btn">← Back to Festivals</a>
 
             <?php
-            $dbFile = dirname(__DIR__) . '/database.db';
+            $dbFile = appDatabasePath();
             $id = $_GET['id'] ?? null;
             $festival = null;
 

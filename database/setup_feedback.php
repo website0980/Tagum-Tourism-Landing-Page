@@ -1,11 +1,12 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
 /**
  * Feedback and Review System Database Setup
  * Creates the feedback table for hotels and restaurants
  */
 
 function ensureFeedbackTable() {
-    $dbFile = __DIR__ . '/../database.db';
+    $dbFile = appDatabasePath();
     $db = new SQLite3($dbFile);
 
     // Create feedback table
@@ -39,6 +40,10 @@ function ensureFeedbackTable() {
 
 // If executed directly, run the setup
 if (realpath($_SERVER['SCRIPT_FILENAME']) === realpath(__FILE__)) {
+    if (PHP_SAPI !== 'cli') {
+        http_response_code(404);
+        exit('Not found.');
+    }
     ensureFeedbackTable();
     echo "Feedback table ready.\n";
 }

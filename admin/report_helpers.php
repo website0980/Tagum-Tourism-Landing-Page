@@ -1,4 +1,6 @@
 <?php
+require_once dirname(__DIR__) . '/includes/database_path.php';
+require_once __DIR__ . '/config.php';
 /**
  * Report Helper Functions for Comprehensive Feedback Report
  * Contains all database queries and data processing functions
@@ -6,14 +8,8 @@
 
 require_once __DIR__ . '/../database/setup_feedback.php';
 
-function requireAuth() {
-    if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-        die('Access denied. Please log in as administrator.');
-    }
-}
-
 function getDatabaseConnection() {
-    $dbFile = __DIR__ . '/../database.db';
+    $dbFile = appDatabasePath();
     return new SQLite3($dbFile);
 }
 

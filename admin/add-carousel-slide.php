@@ -10,6 +10,7 @@ $slide = [
     'description' => '',
     'image' => '',
     'sort_order' => 0,
+    'event_month' => 0,
     'active' => 1,
 ];
 
@@ -31,22 +32,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Invalid or expired session. Please refresh and try again.';
     }
 
+    $eventMonth = max(0, min(12, (int) ($_POST['event_month'] ?? 0)));
+    $existingTitle = trim((string) ($slide['title'] ?? ''));
+    $defaultTitle = $eventMonth === 0 ? 'Homepage image' : date('F', mktime(0, 0, 0, $eventMonth, 1, 2026)) . ' homepage image';
     $slide = [
         'id' => $_POST['id'] ?? '',
-        'tagline' => trim($_POST['tagline'] ?? ''),
-        'title' => trim($_POST['title'] ?? ''),
-        'description' => trim($_POST['description'] ?? ''),
+        'tagline' => trim((string) ($slide['tagline'] ?? '')),
+        'title' => $existingTitle !== '' ? $existingTitle : $defaultTitle,
+        'description' => trim((string) ($slide['description'] ?? '')),
         'image' => $_POST['image'] ?? ($slide['image'] ?? ''),
         'sort_order' => (int) ($_POST['sort_order'] ?? 0),
+        'event_month' => $eventMonth,
         'active' => isset($_POST['active']) ? 1 : 0,
     ];
 
-    if (empty($slide['title'])) {
-        $errors[] = 'Main heading is required';
-    }
-    if (empty($slide['description'])) {
-        $errors[] = 'Description is required';
-    }
     if (!$isEdit && empty($slide['image']) && (!isset($_FILES['image_file']) || $_FILES['image_file']['error'] !== UPLOAD_ERR_OK)) {
         $errors[] = 'Background image is required';
     }
@@ -131,33 +130,26 @@ function adminImageSrc($path) {
                 <?php endif; ?>
 
                 <div class="form-section">
-                    <h2>Slide Text</h2>
-                    <p class="image-option-hint">Use a new line in the main heading for a line break (e.g. "Discover" on one line and "Natural Beauty" on the next).</p>
-
+                    <h2>Homepage Image Settings</h2>
                     <div class="form-group">
-                        <label for="tagline">Small Text (Tagline)</label>
-                        <input type="text" id="tagline" name="tagline" value="<?php echo htmlspecialchars($slide['tagline']); ?>" class="form-control" placeholder="e.g., Tagumeños: Beauty that Shines from Within.">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="title">Main Heading (Big Text) *</label>
-                        <textarea id="title" name="title" required class="form-control form-textarea" rows="2" placeholder="Discover&#10;Natural Beauty"><?php echo htmlspecialchars($slide['title']); ?></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="description">Description (Smaller Text) *</label>
-                        <textarea id="description" name="description" required class="form-control form-textarea" rows="4" placeholder="Supporting paragraph shown below the heading"><?php echo htmlspecialchars($slide['description']); ?></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="sort_order">Display Order</label>
+                        <label for="sort_order">Image position</label>
                         <input type="number" id="sort_order" name="sort_order" value="<?php echo (int) ($slide['sort_order'] ?? 0); ?>" min="0" class="form-control" style="max-width:120px;">
-                        <small>Lower numbers appear first in the carousel.</small>
+                        <small>Lower numbers appear first within the selected month.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="event_month">Homepage month</label>
+                        <select id="event_month" name="event_month" class="form-control">
+                            <option value="0" <?php echo (int) ($slide['event_month'] ?? 0) === 0 ? 'selected' : ''; ?>>All months (fallback)</option>
+                            <?php foreach (range(1, 12) as $month): ?>
+                                <option value="<?php echo $month; ?>" <?php echo (int) ($slide['event_month'] ?? 0) === $month ? 'selected' : ''; ?>><?php echo date('F', mktime(0, 0, 0, $month, 1, 2026)); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <small>Assign up to three images to a month for its homepage picture set.</small>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <h2>Background Image</h2>
+                    <h2>Homepage Image</h2>
                     <?php
                     $image = !empty($slide['image']) ? adminImageSrc($slide['image']) : '';
                     $storedImage = $slide['image'] ?? '';
