@@ -373,6 +373,7 @@ function adminRoutePermission(): ?array {
     $routes = [
         'add-carousel-slide.php' => ['carousel', 'manage'],
         'delete-carousel-slide.php' => ['carousel', 'manage'],
+        'hero-packages.php' => ['carousel', 'manage'],
         'add-cultural-heritage.php' => ['cultural_heritage', 'manage'],
         'add-destination.php' => ['destinations', 'manage'],
         'edit-destination.php' => ['destinations', 'manage'],

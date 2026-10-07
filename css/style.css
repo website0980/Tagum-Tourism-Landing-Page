@@ -90,10 +90,6 @@ body {
         left: 0;
     }
     
-    .nav-menu.active {
-        right: 0;
-    }
-    
     /* No backdrop - direct tap-to-close via JS */
     
     .nav-menu li {
@@ -355,15 +351,25 @@ html {
     width: 76px;
     height: 150px;
     pointer-events: none;
-    transform: scale(0.75);
+    --cny-lantern-scale: 0.75;
+    transform: scale(var(--cny-lantern-scale));
     transform-origin: top center;
     filter: drop-shadow(0 5px 8px rgba(139, 30, 30, 0.18));
+    animation: lantern-swing 5s ease-in-out infinite;
 }
 
 .theme-chinese-new-year .cny-lantern-left {
     top: 30px;
     right: 36%;
-    transform: scale(0.52);
+    --cny-lantern-scale: 0.52;
+}
+
+.theme-chinese-new-year .cny-lantern:nth-child(2) {
+    animation-delay: -1.5s;
+}
+
+.theme-chinese-new-year .cny-lantern:nth-child(3) {
+    animation-delay: -2.8s;
 }
 
 .theme-chinese-new-year .cny-art-panel {
@@ -380,7 +386,7 @@ html {
     top: 0;
     left: 0;
     right: auto;
-    transform: scale(0.75);
+    --cny-lantern-scale: 0.75;
     transform-origin: top left;
 }
 
@@ -621,6 +627,571 @@ html {
     border-top-color: rgba(1, 68, 33, 0.24);
 }
 
+.festival-hero.theme-musikahan {
+    --festival-shell-bg: #F8F0FF;
+    --festival-shell-border: rgba(138, 43, 226, 0.5);
+    --festival-green-deep: #4A148C;
+    --festival-green-mid: #6A1B9A;
+    --festival-green-soft: #7B1FA2;
+    --festival-green-text: #4A148C;
+    --festival-gold: #9C27B0;
+    --festival-gold-deep: #7B1FA2;
+    --festival-gold-soft: #BA68C8;
+    --festival-cream: #F8F0FF;
+    --festival-muted: #4A148C;
+}
+
+.theme-musikahan .hero-shell {
+    background: #F8F0FF;
+    border-color: rgba(138, 43, 226, 0.5);
+}
+
+.theme-musikahan .hero-shell::before,
+.theme-musikahan .hero-shell::after {
+    background: radial-gradient(circle at center, rgba(156, 39, 176, 0.15) 0%, rgba(156, 39, 176, 0.1) 40%, transparent 72%);
+}
+
+.theme-musikahan .hero-badge {
+    background: linear-gradient(135deg, #7B1FA2, #9C27B0);
+    color: #F8F0FF;
+}
+
+.theme-musikahan .hero-copy h1 {
+    background: linear-gradient(105deg, #4A148C 0%, #7B1FA2 48%, #9C27B0 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.theme-musikahan .hero-script {
+    background: linear-gradient(105deg, #4A148C 0%, #7B1FA2 48%, #9C27B0 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.theme-musikahan .hero-meta {
+    color: #9C27B0;
+}
+
+.theme-musikahan .meta-separator {
+    color: #9C27B0;
+}
+
+.theme-musikahan .hero-description,
+.theme-musikahan .hero-month-event {
+    color: #4A148C;
+}
+
+.theme-musikahan .hero-cta {
+    background: linear-gradient(110deg, #7B1FA2 0%, #9C27B0 100%);
+    border: 1px solid #BA68C8;
+    color: #F8F0FF;
+}
+
+.theme-musikahan .hero-cta:hover {
+    background: #BA68C8;
+    color: #4A148C;
+    box-shadow: 0 12px 24px rgba(123, 31, 162, 0.3);
+}
+
+.theme-musikahan .hero-cta span {
+    color: #F8F0FF;
+}
+
+.theme-musikahan .hero-cta:hover span {
+    color: #4A148C;
+}
+
+.theme-musikahan .hero-main-image,
+.theme-musikahan .hero-side-card {
+    border-color: rgba(156, 39, 176, 0.5);
+}
+
+.theme-musikahan .feature-icon-pink {
+    background: rgba(156, 39, 176, 0.15);
+    color: #7B1FA2;
+}
+
+.theme-musikahan .feature-icon-mint {
+    background: rgba(74, 20, 140, 0.12);
+    color: #4A148C;
+}
+
+.theme-musikahan .feature-icon-gold {
+    background: rgba(186, 104, 200, 0.2);
+    color: #6A1B9A;
+}
+
+.theme-musikahan .feature-copy h3 {
+    color: #4A148C;
+}
+
+.theme-musikahan .feature-copy p {
+    color: rgba(74, 20, 140, 0.82);
+}
+
+.theme-musikahan .hero-features {
+    border-top-color: rgba(74, 20, 140, 0.24);
+}
+
+.theme-musikahan .hero-month-strip {
+    margin-inline: -2.1rem;
+    background: linear-gradient(110deg, #7B1FA2 0%, #9C27B0 100%);
+    border-top: 1px solid rgba(186, 104, 200, 0.75);
+    box-shadow: inset 0 1px 0 rgba(248, 240, 255, 0.18);
+}
+
+.theme-musikahan .month-list {
+    color: #F8F0FF;
+}
+
+.theme-musikahan .month-item:hover,
+.theme-musikahan .month-item:focus-visible {
+    color: #BA68C8;
+}
+
+.theme-musikahan .month-nav-btn {
+    border-color: #BA68C8;
+    background: rgba(74, 20, 140, 0.22);
+    color: #BA68C8;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.theme-musikahan .month-nav-btn:hover,
+.theme-musikahan .month-nav-btn:focus-visible {
+    background: #BA68C8;
+    color: #4A148C;
+    transform: translateY(-1px);
+}
+
+.theme-musikahan .music-note,
+.theme-musikahan-blue .music-note {
+    position: absolute;
+    font-size: 2rem;
+    color: rgba(156, 39, 176, 0.3);
+    pointer-events: none;
+    animation: float 3s ease-in-out infinite;
+}
+
+.theme-musikahan .music-note:nth-child(1),
+.theme-musikahan-blue .music-note:nth-child(1) {
+    top: 10%;
+    right: 5%;
+    animation-delay: 0s;
+}
+
+.theme-musikahan .music-note:nth-child(2),
+.theme-musikahan-blue .music-note:nth-child(2) {
+    top: 30%;
+    right: 8%;
+    animation-delay: 0.5s;
+    font-size: 1.5rem;
+}
+
+.theme-musikahan .music-note:nth-child(3),
+.theme-musikahan-blue .music-note:nth-child(3) {
+    top: 50%;
+    right: 3%;
+    animation-delay: 1s;
+    font-size: 1.8rem;
+}
+
+.theme-musikahan .music-note:nth-child(4),
+.theme-musikahan-blue .music-note:nth-child(4) {
+    top: 70%;
+    right: 6%;
+    animation-delay: 1.5s;
+    font-size: 1.3rem;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-20px) rotate(10deg);
+    }
+}
+
+@keyframes lantern-swing {
+    0%, 100% {
+        transform: translateX(0) rotate(-2deg) scale(var(--cny-lantern-scale));
+    }
+    50% {
+        transform: translateX(3px) rotate(2deg) scale(var(--cny-lantern-scale));
+    }
+}
+
+@media (max-width: 1100px) {
+    .theme-musikahan .music-note,
+    .theme-musikahan-blue .music-note {
+        display: none;
+    }
+}
+
+.hero-decor-cny,
+.hero-decor-music,
+.hero-decor-music-staff {
+    display: none;
+    pointer-events: none;
+}
+
+.festival-hero.theme-chinese-new-year .hero-decor-cny {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.festival-hero.theme-musikahan .hero-decor-music,
+.festival-hero.theme-musikahan-blue .hero-decor-music {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+/* February Musikahan — lavender and blue palette */
+.festival-hero.theme-musikahan-blue {
+    --festival-shell-bg: #f7f3ff;
+    --festival-shell-border: rgba(108, 78, 255, 0.42);
+    --festival-green-deep: #332b76;
+    --festival-green-mid: #5f47c7;
+    --festival-green-soft: #8e72e8;
+    --festival-green-text: #4f3aa3;
+    --festival-gold: #73bdf4;
+    --festival-gold-deep: #3f73b8;
+    --festival-gold-soft: #b9ddff;
+    --festival-cream: #fbf9ff;
+    --festival-muted: #5d5a7d;
+}
+
+.theme-musikahan-blue .hero-shell {
+    background: linear-gradient(135deg, #fbf9ff 0%, #f1f6ff 55%, #f4efff 100%);
+    border-color: rgba(108, 78, 255, 0.38);
+    box-shadow: 0 0 0 0.75px rgba(108, 78, 255, 0.12), 0 10px 24px rgba(51, 43, 118, 0.08);
+}
+
+.theme-musikahan-blue .hero-shell::before,
+.theme-musikahan-blue .hero-shell::after {
+    background: radial-gradient(circle at center, rgba(142, 114, 232, 0.2) 0%, rgba(115, 189, 244, 0.12) 45%, transparent 72%);
+}
+
+.theme-musikahan-blue .hero-badge {
+    min-width: auto;
+    padding: 0.55rem 1.15rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #332b76, #5f47c7);
+    color: #ffffff;
+    font-size: 0.95rem;
+}
+
+.theme-musikahan-blue .hero-copy h1 {
+    font-size: clamp(3.2rem, 6vw, 5.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    background: linear-gradient(105deg, #332b76 0%, #5f47c7 48%, #3f73b8 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.theme-musikahan-blue .hero-script {
+    font-size: clamp(1.35rem, 2vw, 1.75rem);
+    color: #332b76;
+    background: none;
+    -webkit-background-clip: unset;
+}
+
+.theme-musikahan-blue .hero-meta {
+    color: #5f47c7;
+    font-weight: 700;
+}
+
+.theme-musikahan-blue .meta-separator {
+    color: #3f73b8;
+}
+
+.theme-musikahan-blue .hero-description {
+    color: #5d5a7d;
+    max-width: 520px;
+}
+
+.theme-musikahan-blue .hero-month-event {
+    color: #332b76;
+}
+
+.theme-musikahan-blue .hero-cta {
+    background: linear-gradient(110deg, #332b76 0%, #5f47c7 100%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    letter-spacing: 0.06em;
+    font-weight: 800;
+    box-shadow: 0 10px 22px rgba(51, 43, 118, 0.22);
+}
+
+.theme-musikahan-blue .hero-cta:hover {
+    background: linear-gradient(110deg, #5f47c7, #3f73b8);
+    color: #ffffff;
+    box-shadow: 0 12px 24px rgba(95, 71, 199, 0.3);
+}
+
+.theme-musikahan-blue .hero-cta span {
+    color: inherit;
+}
+
+.theme-musikahan-blue .hero-main-image,
+.theme-musikahan-blue .hero-side-card {
+    border-color: rgba(95, 71, 199, 0.38);
+}
+
+.theme-musikahan-blue .feature-icon-pink {
+    background: rgba(142, 114, 232, 0.16);
+    color: #5f47c7;
+}
+
+.theme-musikahan-blue .feature-icon-mint {
+    background: rgba(63, 115, 184, 0.12);
+    color: #3f73b8;
+}
+
+.theme-musikahan-blue .feature-icon-gold {
+    background: rgba(115, 189, 244, 0.24);
+    color: #332b76;
+}
+
+.theme-musikahan-blue .feature-copy h3 {
+    color: #332b76;
+}
+
+.theme-musikahan-blue .feature-copy p {
+    color: rgba(93, 90, 125, 0.9);
+}
+
+.theme-musikahan-blue .hero-features {
+    border-top-color: rgba(95, 71, 199, 0.24);
+}
+
+.theme-musikahan-blue .hero-month-strip {
+    margin-inline: -2.1rem;
+    background: linear-gradient(110deg, #332b76 0%, #5f47c7 55%, #3f73b8 100%);
+    border-top: 1px solid rgba(185, 221, 255, 0.55);
+}
+
+.theme-musikahan-blue .month-list {
+    color: #ffffff;
+}
+
+.theme-musikahan-blue .month-item:hover,
+.theme-musikahan-blue .month-item:focus-visible {
+    color: #b9ddff;
+}
+
+.theme-musikahan-blue .month-nav-btn {
+    border-color: #b9ddff;
+    background: rgba(51, 43, 118, 0.28);
+    color: #b9ddff;
+}
+
+.theme-musikahan-blue .month-nav-btn:hover,
+.theme-musikahan-blue .month-nav-btn:focus-visible {
+    background: #b9ddff;
+    color: #332b76;
+}
+
+.theme-musikahan-blue .music-note {
+    color: rgba(95, 71, 199, 0.78);
+    text-shadow: 0 3px 12px rgba(51, 43, 118, 0.22);
+}
+
+.theme-musikahan-blue .hero-decor-music {
+    z-index: 3;
+}
+
+.theme-musikahan-blue .music-note:nth-child(1) {
+    top: 0.75rem;
+    left: 2rem;
+    right: auto;
+}
+
+.theme-musikahan-blue .music-note:nth-child(2) {
+    top: 0.75rem;
+    left: 5rem;
+    right: auto;
+}
+
+.theme-musikahan-blue .music-note:nth-child(3) {
+    top: 0.75rem;
+    left: 8rem;
+    right: auto;
+}
+
+.theme-musikahan-blue .music-note:nth-child(4) {
+    top: 0.75rem;
+    left: 11rem;
+    right: auto;
+}
+
+.theme-musikahan-blue .hero-visual {
+    position: relative;
+    isolation: isolate;
+}
+
+.theme-musikahan-blue .hero-main-image,
+.theme-musikahan-blue .hero-side-stack {
+    position: relative;
+    z-index: 1;
+}
+
+/* Araw ng Tagum — green with yellow/orange accents */
+.festival-hero.theme-araw-green {
+    --festival-shell-bg: #f2f7e8;
+    --festival-shell-border: rgba(214, 158, 46, 0.55);
+    --festival-green-deep: #1c6b2e;
+    --festival-green-mid: #2e8b3d;
+    --festival-green-soft: #57a95f;
+    --festival-green-text: #14521f;
+    --festival-gold: #f2b33d;
+    --festival-gold-deep: #e07f1f;
+    --festival-gold-soft: #f7d488;
+    --festival-cream: #fdf9ec;
+    --festival-muted: #3f5c3a;
+}
+
+.theme-araw-green .hero-shell {
+    background: linear-gradient(135deg, #fdf9ec 0%, #eef6e2 55%, #f9efd8 100%);
+    border-color: rgba(214, 158, 46, 0.5);
+    box-shadow: 0 0 0 0.75px rgba(214, 158, 46, 0.14), 0 10px 24px rgba(28, 107, 46, 0.1);
+}
+
+.theme-araw-green .hero-shell::before,
+.theme-araw-green .hero-shell::after {
+    background: radial-gradient(circle at center, rgba(87, 169, 95, 0.2) 0%, rgba(242, 179, 61, 0.14) 45%, transparent 72%);
+}
+
+.theme-araw-green .hero-badge {
+    min-width: auto;
+    padding: 0.55rem 1.15rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #1c6b2e, #2e8b3d);
+    color: #ffffff;
+    font-size: 0.95rem;
+}
+
+.theme-araw-green .hero-copy h1 {
+    font-size: clamp(3.2rem, 6vw, 5.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    background: linear-gradient(105deg, #1c6b2e 0%, #2e8b3d 48%, #e07f1f 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.theme-araw-green .hero-script {
+    font-size: clamp(1.35rem, 2vw, 1.75rem);
+    color: #1c6b2e;
+    background: none;
+    -webkit-background-clip: unset;
+}
+
+.theme-araw-green .hero-meta {
+    color: #2e8b3d;
+    font-weight: 700;
+}
+
+.theme-araw-green .meta-separator {
+    color: #e07f1f;
+}
+
+.theme-araw-green .hero-description {
+    color: #3f5c3a;
+    max-width: 520px;
+}
+
+.theme-araw-green .hero-month-event {
+    color: #1c6b2e;
+}
+
+.theme-araw-green .hero-cta {
+    background: linear-gradient(110deg, #1c6b2e 0%, #2e8b3d 100%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    letter-spacing: 0.06em;
+    font-weight: 800;
+    box-shadow: 0 10px 22px rgba(28, 107, 46, 0.22);
+}
+
+.theme-araw-green .hero-cta:hover {
+    background: linear-gradient(110deg, #2e8b3d, #e07f1f);
+    color: #ffffff;
+    box-shadow: 0 12px 24px rgba(46, 139, 61, 0.3);
+}
+
+.theme-araw-green .hero-cta span {
+    color: inherit;
+}
+
+.theme-araw-green .hero-main-image,
+.theme-araw-green .hero-side-card {
+    border-color: rgba(46, 139, 61, 0.38);
+}
+
+.theme-araw-green .feature-icon-pink {
+    background: rgba(87, 169, 95, 0.16);
+    color: #2e8b3d;
+}
+
+.theme-araw-green .feature-icon-mint {
+    background: rgba(224, 127, 31, 0.14);
+    color: #e07f1f;
+}
+
+.theme-araw-green .feature-icon-gold {
+    background: rgba(242, 179, 61, 0.24);
+    color: #1c6b2e;
+}
+
+.theme-araw-green .feature-copy h3 {
+    color: #1c6b2e;
+}
+
+.theme-araw-green .feature-copy p {
+    color: rgba(63, 92, 58, 0.9);
+}
+
+.theme-araw-green .hero-features {
+    border-top-color: rgba(46, 139, 61, 0.24);
+}
+
+.theme-araw-green .hero-month-strip {
+    margin-inline: -2.1rem;
+    background: linear-gradient(110deg, #1c6b2e 0%, #2e8b3d 55%, #e07f1f 100%);
+    border-top: 1px solid rgba(247, 212, 136, 0.55);
+}
+
+.theme-araw-green .month-list {
+    color: #ffffff;
+}
+
+.theme-araw-green .month-item:hover,
+.theme-araw-green .month-item:focus-visible {
+    color: #f7d488;
+}
+
+.theme-araw-green .month-nav-btn {
+    border-color: #f7d488;
+    background: rgba(28, 107, 46, 0.28);
+    color: #f7d488;
+}
+
+.theme-araw-green .month-nav-btn:hover,
+.theme-araw-green .month-nav-btn:focus-visible {
+    background: #f7d488;
+    color: #1c6b2e;
+}
+
 .hero-shell {
     position: relative;
     background: linear-gradient(180deg, rgba(251, 247, 239, 0.97) 0%, rgba(245, 237, 220, 0.96) 100%);
@@ -774,6 +1345,7 @@ html {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center top;
 }
 
 .hero-side-stack {

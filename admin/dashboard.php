@@ -2,6 +2,9 @@
 // Admin Dashboard - Tagum City
 require_once 'config.php';
 requireAuth();
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Pragma: no-cache');
+header('Expires: 0');
 $dashboardAdmin = currentAdminUser();
 $pendingPasswordChangeCount = (int)$dashboardAdmin['is_super_admin'] === 1 ? countPendingAdminPasswordChangeRequests() : 0;
 
@@ -11,7 +14,7 @@ $events = loadCulturalSites(); // Events data loaded from cultural sites
 $festivals = loadFestivals();
 $hotels = loadHotels();
 $restaurants = loadRestaurants();
-$carouselSlides = loadCarouselSlides();
+$heroPackages = loadHeroPackages();
 $homepageSettings = loadHomepageSettings();
 $certificationApplications = loadAccommodationApplications();
 $culturalHeritage = json_decode(file_get_contents('../Cultural Heritage Module/cultural-heritage.json'), true) ?? [];
@@ -82,15 +85,6 @@ case 'toggle-featured':
             }
             break;
 
-        case 'toggle-carousel-active':
-            if ($id !== null) {
-                toggleCarouselSlideActive($id);
-                $message = 'Slide visibility updated!';
-                $messageType = 'success';
-                $carouselSlides = loadCarouselSlides();
-            }
-            break;
-
         case 'update-homepage-settings':
             $theme = in_array($_POST['hero_theme'] ?? '', ['theme-rich', 'theme-soft', 'theme-chinese-new-year'], true) ? $_POST['hero_theme'] : 'theme-soft';
             $defaultMonth = max(1, min(12, (int)($_POST['default_month'] ?? 5)));
@@ -152,7 +146,10 @@ case 'toggle-featured':
 
 if (isset($_GET['message']) && $currentTab === 'carousel') {
     $msg = $_GET['message'];
-    if ($msg === 'added') {
+    if ($msg === 'hero_package_saved') {
+        $message = 'Hero package saved successfully!';
+        $messageType = 'success';
+    } elseif ($msg === 'added') {
         $message = 'Carousel slide added successfully!';
         $messageType = 'success';
     } elseif ($msg === 'updated') {
@@ -783,122 +780,49 @@ if (isset($_GET['message']) && $currentTab === 'carousel') {
             <?php endif; ?>
 
             <?php if ($currentTab === 'carousel'): ?>
-                <div class="dashboard-header">
-                    <h2>Manage Homepage</h2>
-                    <a href="add-carousel-slide.php" class="btn btn-primary">+ Add Carousel Slide</a>
+                <div class="dashboard-header package-dashboard-header">
+                    <div>
+                        <span class="package-dashboard-kicker">Homepage package management</span>
+                        <h2>Monthly Hero Packages</h2>
+                        <p>Each month has one complete package with its own copy and three images.</p>
+                    </div>
+                    <span class="package-dashboard-count"><?php echo count($heroPackages); ?> / 12 packages</span>
                 </div>
 
-                <div class="homepage-settings-card">
-                    <h3>Homepage Hero Settings</h3>
-                    <form method="POST" class="homepage-settings-form">
-                        <input type="hidden" name="action" value="update-homepage-settings">
-                        <div class="homepage-settings-grid">
-                            <div class="homepage-field">
-                                <label for="hero_title">Hero title</label>
-                                <textarea id="hero_title" name="hero_title" rows="2" required><?php echo htmlspecialchars((string)($homepageSettings['hero_title'] ?? "FLORES\nDE MAYO")); ?></textarea>
+                <div class="hero-package-grid-admin">
+                    <?php foreach (range(1, 12) as $month): ?>
+                        <?php $package = null; foreach ($heroPackages as $candidate) { if ((int) $candidate['package_month'] === $month) { $package = $candidate; break; } } ?>
+                        <article class="hero-package-card-admin <?php echo $package && !empty($package['active']) ? 'is-active' : ''; ?>">
+                            <div class="hero-package-card-admin-top">
+                                <div>
+                                    <span class="hero-package-month"><?php echo date('F', mktime(0, 0, 0, $month, 1, 2026)); ?></span>
+                                    <h3><?php echo $package ? htmlspecialchars((string) $package['title']) : 'Package not saved'; ?></h3>
+                                </div>
+                                <span class="package-status <?php echo $package && !empty($package['active']) ? 'active' : 'draft'; ?>">
+                                    <?php echo $package && !empty($package['active']) ? 'Live' : 'Draft'; ?>
+                                </span>
                             </div>
-                            <div class="homepage-field">
-                                <label for="hero_script">Hero script</label>
-                                <input id="hero_script" name="hero_script" type="text" value="<?php echo htmlspecialchars((string)($homepageSettings['hero_script'] ?? 'Faith in Bloom.')); ?>" required>
+                            <div class="hero-package-preview-grid">
+                                <?php for ($imageIndex = 1; $imageIndex <= 3; $imageIndex++): ?>
+                                    <?php $imagePath = $package["image_{$imageIndex}"] ?? ''; ?>
+                                    <div class="hero-package-preview">
+                                        <?php if ($imagePath): ?>
+                                            <img src="<?php echo htmlspecialchars(adminImagePath($imagePath)); ?>" alt="<?php echo date('F', mktime(0, 0, 0, $month, 1, 2026)); ?> hero package image <?php echo $imageIndex; ?>" loading="lazy">
+                                        <?php else: ?>
+                                            <span>Picture <?php echo $imageIndex; ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endfor; ?>
                             </div>
-                            <div class="homepage-field">
-                                <label for="default_month">Default month</label>
-                                <select id="default_month" name="default_month">
-                                    <?php foreach (range(1, 12) as $month): ?>
-                                        <option value="<?php echo $month; ?>" <?php echo ((int)($homepageSettings['default_month'] ?? 5) === $month) ? 'selected' : ''; ?>><?php echo date('F', mktime(0,0,0,$month,1,2026)); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
+                            <p class="hero-package-summary"><?php echo $package ? htmlspecialchars((string) $package['description']) : 'Create the monthly copy and upload the three images for this package.'; ?></p>
+                            <div class="hero-package-card-actions">
+                                <a href="hero-packages.php?month=<?php echo $month; ?>" class="btn btn-primary">Edit <?php echo date('F', mktime(0, 0, 0, $month, 1, 2026)); ?></a>
+                                <span class="package-image-count"><?php echo $package ? count(array_filter([$package['image_1'], $package['image_2'], $package['image_3']], static fn ($path) => $path !== '')) : 0; ?> images</span>
                             </div>
-                            <div class="homepage-field">
-                                <label for="hero_theme">Theme</label>
-                                <select id="hero_theme" name="hero_theme">
-                                    <option value="theme-soft" <?php echo (($homepageSettings['hero_theme'] ?? 'theme-soft') === 'theme-soft') ? 'selected' : ''; ?>>Soft green</option>
-                                    <option value="theme-rich" <?php echo (($homepageSettings['hero_theme'] ?? 'theme-soft') === 'theme-rich') ? 'selected' : ''; ?>>Rich green</option>
-                                    <option value="theme-chinese-new-year" <?php echo (($homepageSettings['hero_theme'] ?? 'theme-soft') === 'theme-chinese-new-year') ? 'selected' : ''; ?>>Chinese New Year red and gold</option>
-                                </select>
-                            </div>
-                            <div class="homepage-field">
-                                <label for="hero_meta_1">Tradition label</label>
-                                <input id="hero_meta_1" name="hero_meta_1" type="text" value="<?php echo htmlspecialchars((string)($homepageSettings['hero_meta_1'] ?? 'Tradition')); ?>" required>
-                            </div>
-                            <div class="homepage-field">
-                                <label for="hero_meta_2">Fortune label</label>
-                                <input id="hero_meta_2" name="hero_meta_2" type="text" value="<?php echo htmlspecialchars((string)($homepageSettings['hero_meta_2'] ?? 'Fortune')); ?>" required>
-                            </div>
-                            <div class="homepage-field">
-                                <label for="hero_meta_3">Unity label</label>
-                                <input id="hero_meta_3" name="hero_meta_3" type="text" value="<?php echo htmlspecialchars((string)($homepageSettings['hero_meta_3'] ?? 'Unity')); ?>" required>
-                            </div>
-                            <div class="homepage-field homepage-field-full">
-                                <label for="hero_description">Hero description</label>
-                                <textarea id="hero_description" name="hero_description" rows="3" required><?php echo htmlspecialchars((string)($homepageSettings['hero_description'] ?? 'A colorful celebration of tradition, fortune, and unity, bringing Tagumenyos together through flowers, cultural heritage, and shared community spirit.')); ?></textarea>
-                            </div>
-                            <div class="homepage-field homepage-field-full">
-                                <label for="hero_cta">CTA label</label>
-                                <input id="hero_cta" name="hero_cta" type="text" value="<?php echo htmlspecialchars((string)($homepageSettings['hero_cta'] ?? 'EXPLORE FESTIVAL')); ?>" required>
-                            </div>
-                        </div>
-                        <div class="homepage-settings-actions">
-                            <button type="submit" class="btn btn-primary homepage-save-btn">Save Homepage Settings</button>
-                        </div>
-                    </form>
+                        </article>
+                    <?php endforeach; ?>
                 </div>
 
-                <div class="table-responsive">
-                    <?php if (empty($carouselSlides)): ?>
-                        <div class="empty-state">
-                            <p>No carousel slides found</p>
-                            <a href="add-carousel-slide.php" class="btn btn-primary">Add your first slide</a>
-                        </div>
-                    <?php else: ?>
-                        <table class="destinations-table">
-                            <thead>
-                                <tr>
-                                    <th>Image</th>
-                                    <th>Homepage Image</th>
-                                    <th>Homepage Month</th>
-                                    <th>Order</th>
-                                    <th>Visible</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($carouselSlides as $carouselSlide): ?>
-                                    <?php
-                                    $carouselImg = $carouselSlide['image'] ?? '';
-                                    if ($carouselImg && strpos($carouselImg, 'http') !== 0 && strpos($carouselImg, '../') !== 0) {
-                                        $carouselImg = '../' . ltrim($carouselImg, '/');
-                                    }
-                                    ?>
-                                    <tr>
-                                        <td class="table-image">
-                                            <?php if (!empty($carouselSlide['image'])): ?>
-                                                <img src="<?php echo htmlspecialchars($carouselImg); ?>" alt="<?php echo htmlspecialchars($titlePreview); ?>" loading="lazy">
-                                            <?php else: ?>
-                                                <span class="no-image">No Image</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td><strong><?php echo htmlspecialchars((string) ($carouselSlide['title'] ?? 'Homepage image')); ?></strong></td>
-                                        <td><?php echo (int) ($carouselSlide['event_month'] ?? 0) === 0 ? 'All months' : htmlspecialchars(date('F', mktime(0, 0, 0, (int) $carouselSlide['event_month'], 1, 2026))); ?></td>
-                                        <td><?php echo (int) ($carouselSlide['sort_order'] ?? 0); ?></td>
-                                        <td>
-                                            <form method="POST" style="display: inline;">
-                                                <input type="hidden" name="action" value="toggle-carousel-active">
-                                                <input type="hidden" name="id" value="<?php echo $carouselSlide['id']; ?>">
-                                                <button type="submit" class="featured-btn <?php echo !empty($carouselSlide['active']) ? 'active' : ''; ?>">
-                                                    <?php echo !empty($carouselSlide['active']) ? 'Visible' : 'Hidden'; ?>
-                                                </button>
-                                            </form>
-                                        </td>
-                                        <td class="action-buttons">
-                                            <a href="add-carousel-slide.php?id=<?php echo $carouselSlide['id']; ?>" class="btn btn-small btn-edit">Edit</a>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    <?php endif; ?>
-                </div>
             <?php endif; ?>
         </div>
     </main>

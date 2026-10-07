@@ -17,21 +17,17 @@ if (!function_exists('loadHomepageSettings')) {
 <body>
 
     <?php
-    $carouselSlides = [];
     $eventMap = [];
     $carouselImageSets = [];
     $homepageSettings = loadHomepageSettings();
-    $defaultMonth = (int) ($homepageSettings['default_month'] ?? 5);
+    $defaultMonth = (int) ($homepageSettings['default_month'] ?? 1);
+    if ($defaultMonth < 1 || $defaultMonth > 12) {
+        $defaultMonth = 1;
+    }
     $dbFile = appDatabasePath();
     if (file_exists($dbFile)) {
         try {
             $db = new SQLite3($dbFile);
-            ensureCarouselTable();
-            $result = $db->query('SELECT * FROM carousel_slides WHERE active = 1 ORDER BY sort_order ASC, id ASC');
-            while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                $carouselSlides[] = $row;
-            }
-
             $eventsResult = $db->query('SELECT name, event_date FROM events WHERE TRIM(COALESCE(event_date, "")) != "" ORDER BY event_date ASC');
             while ($eventRow = $eventsResult->fetchArray(SQLITE3_ASSOC)) {
                 $eventDate = trim((string) ($eventRow['event_date'] ?? ''));
@@ -47,52 +43,47 @@ if (!function_exists('loadHomepageSettings')) {
             }
             $db->close();
         } catch (Exception $e) {
-            $carouselSlides = [];
             $eventMap = [];
         }
     }
 
-    $fallbackImages = array_values(array_filter(array_map(static function ($slide) {
-        return trim((string) ($slide['image'] ?? ''));
-    }, array_filter($carouselSlides, static function ($slide) {
-        return (int) ($slide['event_month'] ?? 0) === 0;
-    }))));
-    if (!$fallbackImages) {
-        $fallbackImages = array_values(array_filter(array_map(static function ($slide) {
-            return trim((string) ($slide['image'] ?? ''));
-        }, $carouselSlides)));
+    require_once __DIR__ . '/hero_month_profiles.php';
+    $heroPackages = [];
+    if (function_exists('loadHeroPackages')) {
+        $heroPackages = loadHeroPackages();
     }
-    $fallbackImages = array_slice(array_merge($fallbackImages, [
-        'images/Background for slide 1.jpg',
-        'images/Background for slide 2 .jpg',
-        'images/Background for slide 3.jpg',
-    ]), 0, 3);
-    foreach (range(1, 12) as $monthNo) {
-        $monthImages = [];
-        foreach ($carouselSlides as $slide) {
-            if ((int) ($slide['event_month'] ?? 0) === $monthNo && !empty($slide['image'])) {
-                $monthImages[] = trim((string) $slide['image']);
-            }
-        }
-        $carouselImageSets[$monthNo] = array_slice(array_merge($monthImages, $fallbackImages), 0, 3);
-    }
-    $selectedImages = $carouselImageSets[$defaultMonth] ?? $fallbackImages;
+    $heroMonthProfiles = buildHeroMonthProfilesFromPackages($heroPackages, $homepageSettings);
+    $activeHeroProfile = $heroMonthProfiles[(string) $defaultMonth] ?? heroMonthDefaultProfile($homepageSettings);
+    $selectedImages = $activeHeroProfile['images'] ?? [];
     $featuredImage = htmlspecialchars($selectedImages[0] ?? 'images/Background for slide 1.jpg', ENT_QUOTES, 'UTF-8');
     $secondaryImage = htmlspecialchars($selectedImages[1] ?? 'images/Background for slide 2 .jpg', ENT_QUOTES, 'UTF-8');
     $tertiaryImage = htmlspecialchars($selectedImages[2] ?? 'images/Background for slide 3.jpg', ENT_QUOTES, 'UTF-8');
-    $defaultMonthEvent = $eventMap[$defaultMonth][0] ?? ['name' => 'Community festival celebrations', 'date' => ''];
-    $heroTheme = in_array((string) ($homepageSettings['hero_theme'] ?? 'theme-soft'), ['theme-rich', 'theme-soft', 'theme-chinese-new-year'], true) ? (string) $homepageSettings['hero_theme'] : 'theme-soft';
+    foreach (range(1, 12) as $packageMonth) {
+        $packageProfile = $heroMonthProfiles[(string) $packageMonth] ?? null;
+        $carouselImageSets[$packageMonth] = $packageProfile['images'] ?? [];
+    }
+    if ($defaultMonth < 1 || $defaultMonth > 12) {
+        $defaultMonth = 1;
+    }
+    $heroTheme = in_array((string) ($activeHeroProfile['theme'] ?? 'theme-soft'), ['theme-rich', 'theme-soft', 'theme-chinese-new-year', 'theme-musikahan', 'theme-musikahan-blue', 'theme-araw-green'], true)
+        ? (string) $activeHeroProfile['theme']
+        : 'theme-soft';
     $isChineseNewYearTheme = $heroTheme === 'theme-chinese-new-year';
-    $heroTitle = trim((string) ($homepageSettings['hero_title'] ?? "FLORES\nDE MAYO"));
-    $heroScript = trim((string) ($homepageSettings['hero_script'] ?? 'Faith in Bloom.'));
-    $heroDescription = trim((string) ($homepageSettings['hero_description'] ?? 'A colorful celebration of tradition, fortune, and unity, bringing Tagumenyos together through flowers, cultural heritage, and shared community spirit.'));
-    $heroCta = trim((string) ($homepageSettings['hero_cta'] ?? 'EXPLORE FESTIVAL'));
-    $heroTitleLines = preg_split('/\r\n|\r|\n/', $heroTitle) ?: ['FLORES', 'DE MAYO'];
+    $isMusikahanTheme = $heroTheme === 'theme-musikahan' || $heroTheme === 'theme-musikahan-blue';
+    $heroTitleLines = $activeHeroProfile['titleLines'] ?? ['FLORES', 'DE MAYO'];
+    $heroScript = trim((string) ($activeHeroProfile['script'] ?? 'Faith in Bloom.'));
+    $heroDescription = trim((string) ($activeHeroProfile['description'] ?? ''));
+    $heroCta = trim((string) ($activeHeroProfile['cta'] ?? 'EXPLORE FESTIVAL'));
+    $heroMeta1 = trim((string) ($activeHeroProfile['meta1'] ?? 'Tradition'));
+    $heroMeta2 = trim((string) ($activeHeroProfile['meta2'] ?? 'Fortune'));
+    $heroMeta3 = trim((string) ($activeHeroProfile['meta3'] ?? 'Unity'));
+    $heroMonthEventLine = trim((string) ($activeHeroProfile['monthEvent'] ?? ''));
+    $heroFeatures = $activeHeroProfile['features'] ?? [];
     $heroMonthLabel = strtoupper(date('M', mktime(0, 0, 0, $defaultMonth, 1, 2026)));
     ?>
     <section class="festival-hero <?php echo htmlspecialchars($heroTheme); ?>" id="home">
         <div class="hero-shell">
-            <?php if ($isChineseNewYearTheme): ?>
+            <div class="hero-decor hero-decor-cny" aria-hidden="true">
                 <div class="cny-lantern" aria-hidden="true">
                     <span class="cny-lantern-cord"></span>
                     <span class="cny-lantern-cap"></span>
@@ -117,29 +108,36 @@ if (!function_exists('loadHomepageSettings')) {
                         <span class="cny-lantern-tassel"></span>
                     </span>
                 </div>
-            <?php endif; ?>
+            </div>
+            <div class="hero-decor hero-decor-music" aria-hidden="true">
+                <div class="music-note" aria-hidden="true">♪</div>
+                <div class="music-note" aria-hidden="true">♫</div>
+                <div class="music-note" aria-hidden="true">♩</div>
+                <div class="music-note" aria-hidden="true">♬</div>
+            </div>
             <div class="hero-inner">
                 <div class="hero-copy">
-                    <div class="hero-badge"><?php echo htmlspecialchars($heroMonthLabel); ?></div>
-                    <h1>
+                    <div class="hero-badge" id="hero-badge"><?php echo htmlspecialchars($heroMonthLabel); ?></div>
+                    <h1 id="hero-title">
                         <?php foreach ($heroTitleLines as $lineIndex => $line): ?>
                             <?php echo htmlspecialchars($line); ?><?php if ($lineIndex !== count($heroTitleLines) - 1) { echo '<br>'; } ?>
                         <?php endforeach; ?>
                     </h1>
-                    <p class="hero-script"><?php echo htmlspecialchars($heroScript); ?></p>
-                    <div class="hero-meta" aria-label="Festival values">
-                        <span><?php echo htmlspecialchars((string) ($homepageSettings['hero_meta_1'] ?? 'Tradition')); ?></span>
+                    <p class="hero-script" id="hero-script"><?php echo htmlspecialchars($heroScript); ?></p>
+                    <div class="hero-meta" id="hero-meta" aria-label="Festival values">
+                        <span data-meta="1"><?php echo htmlspecialchars($heroMeta1); ?></span>
                         <span class="meta-separator">•</span>
-                        <span><?php echo htmlspecialchars((string) ($homepageSettings['hero_meta_2'] ?? 'Fortune')); ?></span>
+                        <span data-meta="2"><?php echo htmlspecialchars($heroMeta2); ?></span>
                         <span class="meta-separator">•</span>
-                        <span><?php echo htmlspecialchars((string) ($homepageSettings['hero_meta_3'] ?? 'Unity')); ?></span>
+                        <span data-meta="3"><?php echo htmlspecialchars($heroMeta3); ?></span>
                     </div>
-                    <p class="hero-description"><?php echo htmlspecialchars($heroDescription); ?></p>
-                    <p class="hero-month-event"><?php echo htmlspecialchars($defaultMonthEvent['name']); ?></p>
-                    <a href="#explore" class="hero-cta"><?php echo htmlspecialchars($heroCta); ?> <span>→</span></a>
+                    <p class="hero-description" id="hero-description"><?php echo htmlspecialchars($heroDescription); ?></p>
+                    <p class="hero-month-event" id="hero-month-event"<?php echo $heroMonthEventLine === '' ? ' hidden' : ''; ?>><?php echo htmlspecialchars($heroMonthEventLine); ?></p>
+                    <a href="#explore" class="hero-cta" id="hero-cta"><?php echo htmlspecialchars($heroCta); ?> <span>→</span></a>
                 </div>
 
                 <div class="hero-visual" aria-label="Festival imagery">
+                    <div class="hero-decor-music-staff" aria-hidden="true"></div>
                     <div class="hero-main-image">
                         <img src="<?php echo $featuredImage; ?>" alt="Flores de Mayo festival celebration" loading="eager">
                     </div>
@@ -154,34 +152,21 @@ if (!function_exists('loadHomepageSettings')) {
                 </div>
             </div>
 
-            <div class="hero-features">
-                <div class="feature-item">
-                    <div class="feature-icon feature-icon-pink">
-                        <span aria-hidden="true"><?php echo $isChineseNewYearTheme ? '🏮' : '✿'; ?></span>
+            <div class="hero-features" id="hero-features">
+                <?php foreach ($heroFeatures as $featureIndex => $feature): ?>
+                    <?php
+                    $iconClass = $featureIndex === 0 ? 'feature-icon-pink' : ($featureIndex === 1 ? 'feature-icon-mint' : 'feature-icon-gold');
+                    ?>
+                    <div class="feature-item">
+                        <div class="feature-icon <?php echo $iconClass; ?>">
+                            <span class="feature-icon-glyph" aria-hidden="true"><?php echo htmlspecialchars((string) ($feature['icon'] ?? '✿')); ?></span>
+                        </div>
+                        <div class="feature-copy">
+                            <h3 class="feature-title"><?php echo htmlspecialchars((string) ($feature['title'] ?? '')); ?></h3>
+                            <p class="feature-text"><?php echo htmlspecialchars((string) ($feature['text'] ?? '')); ?></p>
+                        </div>
                     </div>
-                    <div class="feature-copy">
-                        <h3>TRADITION</h3>
-                        <p><?php echo $isChineseNewYearTheme ? 'Lanterns, lion dances, and festive customs.' : 'Floral offerings and cultural practices.'; ?></p>
-                    </div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon feature-icon-mint">
-                        <span aria-hidden="true"><?php echo $isChineseNewYearTheme ? '福' : '✦'; ?></span>
-                    </div>
-                    <div class="feature-copy">
-                        <h3>FORTUNE</h3>
-                        <p><?php echo $isChineseNewYearTheme ? 'Welcoming prosperity and good luck in the new year.' : 'Celebrating blessings, abundance, and joy.'; ?></p>
-                    </div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon feature-icon-gold">
-                        <span aria-hidden="true"><?php echo $isChineseNewYearTheme ? '團' : '◌'; ?></span>
-                    </div>
-                    <div class="feature-copy">
-                        <h3>UNITY</h3>
-                        <p><?php echo $isChineseNewYearTheme ? 'Families reunite to celebrate the new year together.' : 'Bringing families and communities together.'; ?></p>
-                    </div>
-                </div>
+                <?php endforeach; ?>
             </div>
 
             <div class="hero-month-strip" aria-label="Festival month navigation">
@@ -201,7 +186,7 @@ if (!function_exists('loadHomepageSettings')) {
                             data-image-main="<?php echo htmlspecialchars($carouselImageSets[$monthNo][0] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                             data-image-top="<?php echo htmlspecialchars($carouselImageSets[$monthNo][1] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                             data-image-bottom="<?php echo htmlspecialchars($carouselImageSets[$monthNo][2] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                            aria-label="View <?php echo htmlspecialchars($monthShort, ENT_QUOTES, 'UTF-8'); ?> events"
+                            aria-label="View <?php echo htmlspecialchars($monthShort, ENT_QUOTES, 'UTF-8'); ?> hero package"
                         ><?php echo htmlspecialchars($monthShort); ?></button>
                     <?php endforeach; ?>
                 </div>
@@ -209,6 +194,7 @@ if (!function_exists('loadHomepageSettings')) {
             </div>
         </div>
     </section>
+    <script type="application/json" id="hero-month-profiles"><?php echo json_encode($heroMonthProfiles, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?></script>
 
     <!-- Explore Section -->
     <section class="explore" id="explore">
@@ -982,8 +968,15 @@ if (!function_exists('loadHomepageSettings')) {
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const monthButtons = Array.from(document.querySelectorAll('.month-item'));
-        const heroBadge = document.querySelector('.hero-badge');
-        const heroMonthEvent = document.querySelector('.hero-month-event');
+        const heroSection = document.querySelector('.festival-hero');
+        const heroBadge = document.getElementById('hero-badge');
+        const heroTitle = document.getElementById('hero-title');
+        const heroScript = document.getElementById('hero-script');
+        const heroMeta = document.getElementById('hero-meta');
+        const heroDescription = document.getElementById('hero-description');
+        const heroMonthEvent = document.getElementById('hero-month-event');
+        const heroCta = document.getElementById('hero-cta');
+        const heroFeatures = document.getElementById('hero-features');
         const heroImages = [
             document.querySelector('.hero-main-image img'),
             document.querySelector('.hero-side-card-top img'),
@@ -992,6 +985,80 @@ if (!function_exists('loadHomepageSettings')) {
         const prevButton = document.querySelector('.month-nav-btn[data-nav="prev"]');
         const nextButton = document.querySelector('.month-nav-btn[data-nav="next"]');
         const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        const heroThemes = ['theme-soft', 'theme-rich', 'theme-chinese-new-year', 'theme-musikahan', 'theme-musikahan-blue', 'theme-araw-green'];
+        let heroMonthProfiles = {};
+        const profilesNode = document.getElementById('hero-month-profiles');
+        if (profilesNode) {
+            try {
+                heroMonthProfiles = JSON.parse(profilesNode.textContent || '{}');
+            } catch (error) {
+                heroMonthProfiles = {};
+            }
+        }
+
+        function setHeroTitle(titleLines) {
+            if (!heroTitle || !Array.isArray(titleLines)) return;
+            heroTitle.innerHTML = '';
+            titleLines.forEach(function(line, index) {
+                if (index > 0) {
+                    heroTitle.appendChild(document.createElement('br'));
+                }
+                heroTitle.appendChild(document.createTextNode(line));
+            });
+        }
+
+        function applyHeroProfile(profile, selectedButton) {
+            if (!profile) return;
+
+            if (heroSection) {
+                heroThemes.forEach(function(themeClass) {
+                    heroSection.classList.remove(themeClass);
+                });
+                heroSection.classList.add(profile.theme || 'theme-soft');
+            }
+
+            if (heroScript) heroScript.textContent = profile.script || '';
+            if (heroDescription) heroDescription.textContent = profile.description || '';
+            if (heroMeta) {
+                const meta1 = heroMeta.querySelector('[data-meta="1"]');
+                const meta2 = heroMeta.querySelector('[data-meta="2"]');
+                const meta3 = heroMeta.querySelector('[data-meta="3"]');
+                if (meta1) meta1.textContent = profile.meta1 || '';
+                if (meta2) meta2.textContent = profile.meta2 || '';
+                if (meta3) meta3.textContent = profile.meta3 || '';
+            }
+
+            setHeroTitle(profile.titleLines || []);
+
+            if (heroMonthEvent) {
+                const monthEventLine = profile.monthEvent || (selectedButton ? selectedButton.dataset.eventName : '') || '';
+                heroMonthEvent.textContent = monthEventLine;
+                heroMonthEvent.hidden = monthEventLine === '';
+            }
+
+            if (heroCta) {
+                const ctaText = profile.cta || 'EXPLORE FESTIVAL';
+                heroCta.innerHTML = '';
+                heroCta.appendChild(document.createTextNode(ctaText + ' '));
+                const arrow = document.createElement('span');
+                arrow.textContent = '→';
+                heroCta.appendChild(arrow);
+            }
+
+            if (heroFeatures && Array.isArray(profile.features)) {
+                const items = heroFeatures.querySelectorAll('.feature-item');
+                profile.features.forEach(function(feature, index) {
+                    const item = items[index];
+                    if (!item) return;
+                    const glyph = item.querySelector('.feature-icon-glyph');
+                    const title = item.querySelector('.feature-title');
+                    const text = item.querySelector('.feature-text');
+                    if (glyph) glyph.textContent = feature.icon || '';
+                    if (title) title.textContent = feature.title || '';
+                    if (text) text.textContent = feature.text || '';
+                });
+            }
+        }
 
         function setSelectedMonth(monthNumber) {
             monthButtons.forEach((button) => {
@@ -1005,10 +1072,9 @@ if (!function_exists('loadHomepageSettings')) {
             }
 
             const selectedButton = document.querySelector('.month-item[data-month="' + monthNumber + '"]');
-            if (heroMonthEvent && selectedButton) {
-                const eventName = selectedButton.dataset.eventName || 'Community festival celebrations';
-                heroMonthEvent.textContent = eventName;
-            }
+            const profile = heroMonthProfiles[String(monthNumber)];
+            applyHeroProfile(profile, selectedButton);
+
             if (selectedButton) {
                 const monthImages = [selectedButton.dataset.imageMain, selectedButton.dataset.imageTop, selectedButton.dataset.imageBottom];
                 heroImages.forEach((image, index) => {

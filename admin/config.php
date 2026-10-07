@@ -112,6 +112,8 @@ define('RESTAURANT_IMAGES_URL', '../../assets/images/restaurants/');
 
 define('CAROUSEL_IMAGES_DIR', dirname(__DIR__) . '/images/carousel/');
 define('CAROUSEL_IMAGES_URL', 'images/carousel/');
+define('HERO_PACKAGES_IMAGES_DIR', dirname(__DIR__) . '/images/hero-packages/');
+define('HERO_PACKAGES_IMAGES_URL', 'images/hero-packages/');
 
 // CSRF Token helpers
 function generateCsrfToken() {
@@ -1088,6 +1090,122 @@ function saveHomepageSettings(array $data): bool {
     }
 }
 
+// HERO PACKAGE FUNCTIONS
+function ensureHeroPackagesTable() {
+    $dbFile = appDatabasePath();
+    if (!file_exists($dbFile)) return false;
+    try {
+        $db = new SQLite3($dbFile);
+        $schema = file_get_contents(dirname(__DIR__) . '/database/hero_packages_schema.sql');
+        if ($schema) {
+            $db->exec($schema);
+        }
+        $columns = $db->query('PRAGMA table_info(hero_packages)');
+        $hasTheme = false;
+        while ($column = $columns->fetchArray(SQLITE3_ASSOC)) {
+            if ($column['name'] === 'theme') {
+                $hasTheme = true;
+                break;
+            }
+        }
+        if (!$hasTheme) {
+            $db->exec('ALTER TABLE hero_packages ADD COLUMN theme TEXT NOT NULL DEFAULT "theme-chinese-new-year"');
+        }
+        $db->close();
+        return true;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+function loadHeroPackage(int $month): array {
+    ensureHeroPackagesTable();
+    $dbFile = appDatabasePath();
+    if (!file_exists($dbFile)) return [];
+    try {
+        $db = new SQLite3($dbFile);
+        $stmt = $db->prepare('SELECT * FROM hero_packages WHERE package_month = ? LIMIT 1');
+        $stmt->bindValue(1, $month, SQLITE3_INTEGER);
+        $result = $stmt->execute();
+        $row = $result->fetchArray(SQLITE3_ASSOC);
+        $db->close();
+        return $row ?: [];
+    } catch (Exception $e) {
+        return [];
+    }
+}
+
+function loadHeroPackages(): array {
+    ensureHeroPackagesTable();
+    $dbFile = appDatabasePath();
+    if (!file_exists($dbFile)) return [];
+    try {
+        $db = new SQLite3($dbFile);
+        $result = $db->query('SELECT * FROM hero_packages ORDER BY package_month ASC');
+        $packages = [];
+        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+            $packages[] = $row;
+        }
+        $db->close();
+        return $packages;
+    } catch (Exception $e) {
+        return [];
+    }
+}
+
+function saveHeroPackageImage($file) {
+    $validation = validateImageUpload($file);
+    if (!$validation['success']) return $validation;
+    if (!is_dir(HERO_PACKAGES_IMAGES_DIR)) mkdir(HERO_PACKAGES_IMAGES_DIR, 0755, true);
+    $fileExt = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $fileName = 'hero_' . $fileExt . '_' . time() . '_' . uniqid() . '.' . $fileExt;
+    $filePath = HERO_PACKAGES_IMAGES_DIR . $fileName;
+    if (move_uploaded_file($file['tmp_name'], $filePath)) {
+        return ['success' => true, 'path' => HERO_PACKAGES_IMAGES_URL . $fileName];
+    }
+    return ['success' => false, 'error' => 'Failed to save image'];
+}
+
+function saveHeroPackage(array $data): bool {
+    ensureHeroPackagesTable();
+    $dbFile = appDatabasePath();
+    if (!file_exists($dbFile)) return false;
+    try {
+        $db = new SQLite3($dbFile);
+        $month = max(1, min(12, (int) ($data['month'] ?? 0)));
+        $existing = loadHeroPackage($month);
+        $stringFields = ['title', 'script', 'description', 'meta_1', 'meta_2', 'meta_3', 'cta', 'theme', 'image_1', 'image_2', 'image_3'];
+        if (!$existing && count(array_filter([$data['image_1'] ?? '', $data['image_2'] ?? '', $data['image_3'] ?? ''], static fn ($path) => $path !== '')) !== 3) {
+            $db->close();
+            return false;
+        }
+        if ($existing) {
+            $stmt = $db->prepare('UPDATE hero_packages SET active=?, title=?, script=?, description=?, meta_1=?, meta_2=?, meta_3=?, cta=?, theme=?, image_1=?, image_2=?, image_3=?, updated_at=CURRENT_TIMESTAMP WHERE package_month=?');
+            $stmt->bindValue(1, (int) $data['active'], SQLITE3_INTEGER);
+            foreach ($stringFields as $index => $field) {
+                $stmt->bindValue($index + 2, $data[$field] ?? '', SQLITE3_TEXT);
+            }
+            $stmt->bindValue(13, $month, SQLITE3_INTEGER);
+            $stmt->execute();
+            $affected = $db->changes();
+            $db->close();
+            return $affected > 0;
+        }
+        $stmt = $db->prepare('INSERT INTO hero_packages (package_month, active, title, script, description, meta_1, meta_2, meta_3, cta, theme, image_1, image_2, image_3) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        $stmt->bindValue(1, $month, SQLITE3_INTEGER);
+        $stmt->bindValue(2, (int) $data['active'], SQLITE3_INTEGER);
+        foreach ($stringFields as $index => $field) {
+            $stmt->bindValue($index + 3, $data[$field] ?? '', SQLITE3_TEXT);
+        }
+        $stmt->execute();
+        $insertedId = $db->lastInsertRowID();
+        $db->close();
+        return $insertedId > 0;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
 // CAROUSEL FUNCTIONS
 function ensureCarouselTable() {
     $dbFile = appDatabasePath();
@@ -1134,6 +1252,31 @@ function loadCarouselSlides($activeOnly = false) {
         return $slides;
     } catch (Exception $e) {
         return [];
+    }
+}
+
+function countCarouselSlidesForMonth(int $month, ?int $excludeId = null): int {
+    ensureCarouselTable();
+    $dbFile = appDatabasePath();
+    if (!file_exists($dbFile)) return 0;
+    try {
+        $db = new SQLite3($dbFile);
+        $query = 'SELECT COUNT(*) FROM carousel_slides WHERE event_month = :month AND active = 1';
+        $params = [':month' => $month];
+        if ($excludeId !== null) {
+            $query .= ' AND id != :id';
+            $params[':id'] = $excludeId;
+        }
+        $stmt = $db->prepare($query);
+        foreach ($params as $name => $value) {
+            $stmt->bindValue($name, $value, SQLITE3_INTEGER);
+        }
+        $result = $stmt->execute();
+        $count = (int) $result->fetchArray(SQLITE3_NUM)[0];
+        $db->close();
+        return $count;
+    } catch (Exception $e) {
+        return 0;
     }
 }
 

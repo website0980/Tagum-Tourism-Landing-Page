@@ -47,13 +47,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
 
     if (!$isEdit && empty($slide['image']) && (!isset($_FILES['image_file']) || $_FILES['image_file']['error'] !== UPLOAD_ERR_OK)) {
-        $errors[] = 'Background image is required';
+        $errors[] = 'Image is required';
     }
 
     if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
         $validation = validateImageUpload($_FILES['image_file']);
         if (!$validation['success']) {
             $errors[] = $validation['error'];
+        }
+    }
+
+    if ($eventMonth === 1 || $eventMonth === 2) {
+        $existingCount = countCarouselSlidesForMonth($eventMonth, $isEdit ? (int) $id : null);
+        if (!$isEdit && $existingCount >= 3) {
+            $errors[] = 'This image group already contains three images. Edit or delete one before adding another.';
         }
     }
 
@@ -137,14 +144,13 @@ function adminImageSrc($path) {
                         <small>Lower numbers appear first within the selected month.</small>
                     </div>
                     <div class="form-group">
-                        <label for="event_month">Homepage month</label>
+                        <label for="event_month">Display image set</label>
                         <select id="event_month" name="event_month" class="form-control">
-                            <option value="0" <?php echo (int) ($slide['event_month'] ?? 0) === 0 ? 'selected' : ''; ?>>All months (fallback)</option>
-                            <?php foreach (range(1, 12) as $month): ?>
-                                <option value="<?php echo $month; ?>" <?php echo (int) ($slide['event_month'] ?? 0) === $month ? 'selected' : ''; ?>><?php echo date('F', mktime(0, 0, 0, $month, 1, 2026)); ?></option>
-                            <?php endforeach; ?>
+                            <option value="0" <?php echo (int) ($slide['event_month'] ?? 0) === 0 ? 'selected' : ''; ?>>All months</option>
+                            <option value="1" <?php echo (int) ($slide['event_month'] ?? 0) === 1 ? 'selected' : ''; ?>>January — up to 3 images</option>
+                            <option value="2" <?php echo (int) ($slide['event_month'] ?? 0) === 2 ? 'selected' : ''; ?>>February — up to 3 images</option>
                         </select>
-                        <small>Assign up to three images to a month for its homepage picture set.</small>
+                        <small>Choose where this image should appear. January and February each support three images.</small>
                     </div>
                 </div>
 

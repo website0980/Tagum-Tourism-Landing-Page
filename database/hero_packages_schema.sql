@@ -1,0 +1,18 @@
+CREATE TABLE IF NOT EXISTS hero_packages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    package_month INTEGER NOT NULL UNIQUE,
+    active INTEGER NOT NULL DEFAULT 1,
+    title TEXT NOT NULL DEFAULT '',
+    script TEXT NOT NULL DEFAULT '',
+    description TEXT NOT NULL DEFAULT '',
+    meta_1 TEXT NOT NULL DEFAULT '',
+    meta_2 TEXT NOT NULL DEFAULT '',
+    meta_3 TEXT NOT NULL DEFAULT '',
+    cta TEXT NOT NULL DEFAULT '',
+    image_1 TEXT NOT NULL DEFAULT '',
+    image_2 TEXT NOT NULL DEFAULT '',
+    image_3 TEXT NOT NULL DEFAULT '',
+    theme TEXT NOT NULL DEFAULT 'theme-chinese-new-year',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
